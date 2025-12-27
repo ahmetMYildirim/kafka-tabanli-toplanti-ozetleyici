@@ -1,0 +1,47 @@
+# Build directories
+build/
+bin/
+.gradle/
+out/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Node modules (will be installed in Docker)
+**/node_modules/
+
+# Audio storage (mounted as volume)
+audio_storage/
+
+# Logs
+logs/
+*.log
+
+# Test files
+src/test/
+
+# Documentation
+*.md
+!README.md
+
+# Environment files with secrets
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+

@@ -1,0 +1,100 @@
+services:
+  # Collector Service Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: collector-service
+    ports:
+      - "8081:8081"
+    environment:
+      # Spring Configuration
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/analyserdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123
+      
+      # Discord Bot (disabled due to SSL issues in Docker)
+      - DISCORD_BOT_ENABLED=false
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN:-your_discord_token_here}
+      
+      # Zoom Bot - DISABLED (Video upload via UI Dashboard will be used instead)
+      # - ZOOM_BOT_ENABLED=false
+      # - ZOOM_BOT_CLIENT_ID=${ZOOM_BOT_CLIENT_ID:-your_zoom_client_id}
+      # - ZOOM_BOT_CLIENT_SECRET=${ZOOM_BOT_CLIENT_SECRET:-your_zoom_client_secret}
+      # - ZOOM_BOT_REDIRECT_URI=http://localhost:8081/meeting-bot/oauth
+      # - ZOOM_BOT_REDIRECT_OAUTH_URI=http://localhost:8082/zoom/callback
+
+      # Gemini API
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-your_gemini_api_key}
+      
+      # Kafka (disabled by default)
+      - KAFKA_ENABLED=false
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      
+      # Java options
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    volumes:
+      - audio-storage:/app/audio_storage
+      - ./logs:/app/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - collector-network
+    restart: unless-stopped
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: collector-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root123
+      - MYSQL_DATABASE=analyserdb
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - collector-network
+    restart: unless-stopped
+
+  # Kafka (optional - uncomment if needed)
+  # zookeeper:
+  #   image: confluentinc/cp-zookeeper:7.5.0
+  #   container_name: collector-zookeeper
+  #   environment:
+  #     ZOOKEEPER_CLIENT_PORT: 2181
+  #     ZOOKEEPER_TICK_TIME: 2000
+  #   networks:
+  #     - collector-network
+
+  # kafka:
+  #   image: confluentinc/cp-kafka:7.5.0
+  #   container_name: collector-kafka
+  #   depends_on:
+  #     - zookeeper
+  #   ports:
+  #     - "9092:9092"
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+  #     KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #   networks:
+  #     - collector-network
+
+networks:
+  collector-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  audio-storage:
+

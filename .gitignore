@@ -1,0 +1,112 @@
+# =====================================================
+# Kafka Tabanlı Toplantı Özetleyici - Toplu .gitignore
+# =====================================================
+
+### Gradle ###
+.gradle/
+**/build/
+!src/**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+### Java ###
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+*.war
+*.ear
+hs_err_pid*
+replay_pid*
+
+### Environment Variables ###
+.env
+.env.*
+!.env.example
+
+### Logs ###
+logs/
+*.log
+*.log.*
+
+### Audio Storage ###
+**/audio_storage/
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Eclipse / STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### OS Files ###
+.DS_Store
+Thumbs.db
+*.swp
+*~
+desktop.ini
+ehthumbs.db
+
+### Docker ###
+docker-compose.override.yml
+
+### Kafka ###
+kafka-logs/
+zookeeper-data/
+data/
+
+### Spring Boot ###
+HELP.md
+# Tüm properties dosyaları (hassas bilgiler içerebilir)
+**/application.properties
+**/application-*.properties
+# Örnek dosyaları koru
+!**/application.properties.example
+!**/application-*.properties.example
+
+### Temporary Files ###
+*.tmp
+*.temp
+*.bak
+*.backup
+
+### Node (eğer frontend varsa) ###
+node_modules/
+npm-debug.log
+yarn-error.log
+
+### Test Results ###
+**/test-results/
+**/reports/
+
+### Coverage ###
+coverage/
+*.exec
+jacoco.exec
+
+### Compiled binaries ###
+**/libs/*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
