@@ -57,4 +57,19 @@ public class MediaUploadController {
 
         return ResponseEntity.ok(mediaIngestService.uploadMedia(file, request));
     }
+
+    @PostMapping(value = "/upload/googlemeet", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<MediaUploadResponse> uploadGoogleMeetMedia(
+            @RequestPart("file") MultipartFile file,
+            @RequestPart String meetingId,
+            @RequestPart(required = false) String meetingTitle
+    ){
+        MediaUploadRequest request = MediaUploadRequest.builder()
+                .meetingId(meetingId)
+                .platform("GOOGLE_MEET")
+                .meetingTitle(meetingTitle)
+                .build();
+
+        return ResponseEntity.ok(mediaIngestService.uploadMedia(file, request));
+    }
 }
