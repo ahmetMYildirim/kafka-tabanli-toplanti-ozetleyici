@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Collector Service - Test Raporu</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        /* Top Header - Orange Banner */
+        .top-header {
+            position: relative; /* ✅ actions absolute için referans */
+            background: linear-gradient(135deg, #ea580c, #f97316);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .top-header h1 {
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .top-header .date-range {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .top-header .actions {
+            position: absolute;
+            right: 40px;
+            top: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .top-header .actions a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.95;
+        }
+        .top-header .actions a:hover { opacity: 1; text-decoration: underline; }
+
+        /* Main Container */
+        .container {
+            max-width: 900px;
+            margin: -30px auto 40px;
+            padding: 0 20px;
+        }
+
+        /* Company Card */
+        .company-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .company-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 25px;
+        }
+
+        .company-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            min-width: 0;
+        }
+
+        .company-logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ea580c, #f97316);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex: 0 0 auto;
+        }
+
+        .company-details { min-width: 0; }
+
+        .company-details h2 {
+            font-size: 22px;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+
+        .company-details .meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .company-details .meta span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            word-break: break-word;
+        }
+
+        .total-stats { text-align: right; flex: 0 0 auto; }
+
+        .total-stats .label {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .total-stats .value {
+            font-size: 42px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1;
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 30px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .quick-stats span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .quick-stats .number {
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        /* Summary Cards */
+        .summary-cards {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1 1 180px;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card.total  { background: linear-gradient(135deg, #ea580c, #f97316); color: white; }
+        .stat-card.passed { background: linear-gradient(135deg, #16a34a, #22c55e); color: white; }
+        .stat-card.failed { background: linear-gradient(135deg, #dc2626, #ef4444); color: white; }
+
+        .stat-card .number { font-size: 36px; font-weight: 700; }
+        .stat-card .label  { font-size: 12px; opacity: 0.9; margin-top: 4px; }
+
+        /* Section Title */
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin: 30px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ea580c;
+            display: inline-block;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            padding: 18px;
+            background: #fafafa;
+            border-radius: 10px;
+            border-left: 4px solid #ea580c;
+            min-width: 0;
+        }
+
+        .info-item .label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .info-item .value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+            word-break: break-word;
+        }
+
+        /* Coverage */
+        .coverage-section { margin: 25px 0; }
+
+        .coverage-bar {
+            height: 12px;
+            background: #e5e5e5;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+
+        .coverage-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ea580c, #f97316);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .coverage-text {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .coverage-text .percent { font-weight: 700; color: #ea580c; }
+
+        /* Data Table */
+        .table-wrap { overflow-x: auto; } /* ✅ mobilde taşma olmasın */
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            min-width: 520px; /* ✅ dar ekranda yatay kaydırma için */
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #eee;
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        .data-table tr:hover { background: #fafafa; }
+
+        /* ✅ Eski kural: last-child sağa hizalıydı; Status için genelde daha iyi: */
+        .data-table th:last-child,
+        .data-table td:last-child {
+            text-align: left;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-badge.passed { background: #dcfce7; color: #166534; }
+        .status-badge.failed { background: #fee2e2; color: #991b1b; }
+
+        .status-badge::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* Duration Badge */
+        .duration {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #fff7ed;
+            color: #ea580c;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 30px 0 0;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .footer p { margin: 4px 0; }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .company-card { padding: 26px 22px; }
+            .top-header .actions { right: 18px; }
+        }
+
+        @media (max-width: 768px) {
+            .company-header { flex-direction: column; align-items: flex-start; }
+            .total-stats { text-align: left; }
+            .info-grid { grid-template-columns: repeat(2, 1fr); }
+            .container { margin-top: -22px; }
+        }
+
+        @media (max-width: 420px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .top-header { padding: 34px 0; }
+            .top-header h1 { font-size: 26px; }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                background: white;
+            }
+            .top-header { padding: 30px 0; }
+            .container { margin-top: -20px; }
+            .company-card { box-shadow: none; border: 1px solid #eee; }
+            .top-header .actions { display: none; }
+            .data-table { min-width: 0; }
+        }
+    </style>
+</head>
+
+<body>
+<!-- Top Orange Header -->
+<div class="top-header">
+    <!-- İstersen aç: sağ üstte linkler -->
+    <!--
+    <div class="actions">
+      <a href="{{JUNIT_REPORT_URL}}">JUnit</a>
+      <a href="{{JACOCO_REPORT_URL}}">JaCoCo</a>
+    </div>
+    -->
+    <h1>Detailed Test Report</h1>
+    <div class="date-range">{{REPORT_DATE}}</div>
+</div>
+
+<div class="container">
+    <div class="company-card">
+        <div class="company-header">
+            <div class="company-info">
+                <div class="company-logo">🧪</div>
+                <div class="company-details">
+                    <h2>Collector Service</h2>
+                    <div class="meta">
+                        <span>org.example.collector_service</span>
+                        <span>Version: 1.0.0</span>
+                        <span>Spring Boot 3.5.6</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="total-stats">
+                <div class="label">Success Rate</div>
+                <div class="value">{{SUCCESS_RATE}}%</div>
+            </div>
+        </div>
+
+        <div class="quick-stats">
+            <span><span class="number">{{TOTAL_TESTS}}</span> tests</span>
+            <span>•</span>
+            <span><span class="number">{{PASSED_TESTS}}</span> passed</span>
+            <span>•</span>
+            <span><span class="number">{{FAILED_TESTS}}</span> failed</span>
+            <span>•</span>
+            <span><span class="number">{{COVERAGE}}</span>% coverage</span>
+        </div>
+
+        <div class="summary-cards">
+            <div class="stat-card total">
+                <div class="number">{{TOTAL_TESTS}}</div>
+                <div class="label">Total Tests</div>
+            </div>
+            <div class="stat-card passed">
+                <div class="number">{{PASSED_TESTS}}</div>
+                <div class="label">Passed</div>
+            </div>
+            <div class="stat-card failed">
+                <div class="number">{{FAILED_TESTS}}</div>
+                <div class="label">Failed</div>
+            </div>
+        </div>
+
+        <div class="section-title">Project Information</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="label">Project</div>
+                <div class="value">Collector Service</div>
+            </div>
+            <div class="info-item">
+                <div class="label">Version</div>
+                <div class="value">1.0.0</div>
+            </div>
+            <div class="info-item">
+                <div class="label">Framework</div>
+                <div class="value">Spring Boot 3.5.6</div>
+            </div>
+            <div class="info-item">
+                <div class="label">Test Framework</div>
+                <div class="value">JUnit 5 + Mockito</div>
+            </div>
+        </div>
+
+        <div class="section-title">Code Coverage</div>
+        <div class="coverage-section">
+            <div class="coverage-bar">
+                <div class="coverage-fill" style="width: {{COVERAGE}}%;"></div>
+            </div>
+            <div class="coverage-text">
+                <span>Minimum requirement: 30%</span>
+                <span class="percent">{{COVERAGE}}%</span>
+            </div>
+        </div>
+
+        <div class="section-title">Test Suites</div>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Test Suite</th>
+                    <th>Tests</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{TEST_SUITES}}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-title">Test Details</div>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Test Name</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{TEST_DETAILS}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
