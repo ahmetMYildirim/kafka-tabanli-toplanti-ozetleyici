@@ -15,9 +15,9 @@
             background: #f5f5f5;
         }
 
-        /* Top Header - Orange Banner */
+        /* Üst Başlık - Turuncu Banner */
         .top-header {
-            position: relative; /* ✅ actions absolute için referans */
+            position: relative;
             background: linear-gradient(135deg, #ea580c, #f97316);
             color: white;
             padding: 40px 0;
@@ -53,14 +53,14 @@
         }
         .top-header .actions a:hover { opacity: 1; text-decoration: underline; }
 
-        /* Main Container */
+        /* Ana Kapsayıcı */
         .container {
             max-width: 900px;
             margin: -30px auto 40px;
             padding: 0 20px;
         }
 
-        /* Company Card */
+        /* Kart */
         .company-card {
             background: white;
             border-radius: 16px;
@@ -136,7 +136,7 @@
             line-height: 1;
         }
 
-        /* Quick Stats */
+        /* Hızlı İstatistikler */
         .quick-stats {
             display: flex;
             flex-wrap: wrap;
@@ -157,7 +157,7 @@
             color: #1a1a1a;
         }
 
-        /* Summary Cards */
+        /* Özet Kartları */
         .summary-cards {
             display: flex;
             gap: 15px;
@@ -179,7 +179,7 @@
         .stat-card .number { font-size: 36px; font-weight: 700; }
         .stat-card .label  { font-size: 12px; opacity: 0.9; margin-top: 4px; }
 
-        /* Section Title */
+        /* Bölüm Başlığı */
         .section-title {
             font-size: 16px;
             font-weight: 600;
@@ -190,7 +190,7 @@
             display: inline-block;
         }
 
-        /* Info Grid */
+        /* Bilgi Alanı */
         .info-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -221,7 +221,7 @@
             word-break: break-word;
         }
 
-        /* Coverage */
+        /* Kapsama */
         .coverage-section { margin: 25px 0; }
 
         .coverage-bar {
@@ -249,14 +249,14 @@
 
         .coverage-text .percent { font-weight: 700; color: #ea580c; }
 
-        /* Data Table */
-        .table-wrap { overflow-x: auto; } /* ✅ mobilde taşma olmasın */
+        /* Tablo */
+        .table-wrap { overflow-x: auto; }
 
         .data-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
-            min-width: 520px; /* ✅ dar ekranda yatay kaydırma için */
+            min-width: 520px;
         }
 
         .data-table th {
@@ -280,13 +280,12 @@
 
         .data-table tr:hover { background: #fafafa; }
 
-        /* ✅ Eski kural: last-child sağa hizalıydı; Status için genelde daha iyi: */
         .data-table th:last-child,
         .data-table td:last-child {
             text-align: left;
         }
 
-        /* Status Badge */
+        /* Durum Rozeti */
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -309,7 +308,7 @@
             background: currentColor;
         }
 
-        /* Duration Badge */
+        /* Süre */
         .duration {
             display: inline-block;
             padding: 4px 12px;
@@ -320,18 +319,6 @@
             font-weight: 600;
             white-space: nowrap;
         }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 30px 0 0;
-            margin-top: 30px;
-            border-top: 1px solid #eee;
-            font-size: 12px;
-            color: #999;
-        }
-
-        .footer p { margin: 4px 0; }
 
         /* Responsive */
         @media (max-width: 900px) {
@@ -352,7 +339,7 @@
             .top-header h1 { font-size: 26px; }
         }
 
-        /* Print Styles */
+        /* Yazdırma */
         @media print {
             body {
                 -webkit-print-color-adjust: exact;
@@ -369,7 +356,7 @@
 </head>
 
 <body>
-<!-- Top Orange Header -->
+<!-- Üst Turuncu Başlık -->
 <div class="top-header">
     <!-- İstersen aç: sağ üstte linkler -->
     <!--
@@ -378,7 +365,7 @@
       <a href="{{JACOCO_REPORT_URL}}">JaCoCo</a>
     </div>
     -->
-    <h1>Detailed Test Report</h1>
+    <h1>Test Raporu</h1>
     <div class="date-range">{{REPORT_DATE}}</div>
 </div>
 
@@ -391,82 +378,82 @@
                     <h2>Collector Service</h2>
                     <div class="meta">
                         <span>org.example.collector_service</span>
-                        <span>Version: 1.0.0</span>
+                        <span>Sürüm: 1.0.0</span>
                         <span>Spring Boot 3.5.6</span>
                     </div>
                 </div>
             </div>
 
             <div class="total-stats">
-                <div class="label">Success Rate</div>
+                <div class="label">Başarı Oranı</div>
                 <div class="value">{{SUCCESS_RATE}}%</div>
             </div>
         </div>
 
         <div class="quick-stats">
-            <span><span class="number">{{TOTAL_TESTS}}</span> tests</span>
+            <span><span class="number">{{TOTAL_TESTS}}</span> test</span>
             <span>•</span>
-            <span><span class="number">{{PASSED_TESTS}}</span> passed</span>
+            <span><span class="number">{{PASSED_TESTS}}</span> başarılı</span>
             <span>•</span>
-            <span><span class="number">{{FAILED_TESTS}}</span> failed</span>
+            <span><span class="number">{{FAILED_TESTS}}</span> başarısız</span>
             <span>•</span>
-            <span><span class="number">{{COVERAGE}}</span>% coverage</span>
+            <span><span class="number">{{COVERAGE}}</span>% kapsama oranı</span>
         </div>
 
         <div class="summary-cards">
             <div class="stat-card total">
                 <div class="number">{{TOTAL_TESTS}}</div>
-                <div class="label">Total Tests</div>
+                <div class="label">Toplam Test</div>
             </div>
             <div class="stat-card passed">
                 <div class="number">{{PASSED_TESTS}}</div>
-                <div class="label">Passed</div>
+                <div class="label">Başarılı</div>
             </div>
             <div class="stat-card failed">
                 <div class="number">{{FAILED_TESTS}}</div>
-                <div class="label">Failed</div>
+                <div class="label">Başarısız</div>
             </div>
         </div>
 
-        <div class="section-title">Project Information</div>
+        <div class="section-title">Proje Bilgileri</div>
         <div class="info-grid">
             <div class="info-item">
-                <div class="label">Project</div>
+                <div class="label">Proje</div>
                 <div class="value">Collector Service</div>
             </div>
             <div class="info-item">
-                <div class="label">Version</div>
+                <div class="label">Sürüm</div>
                 <div class="value">1.0.0</div>
             </div>
             <div class="info-item">
-                <div class="label">Framework</div>
+                <div class="label">Çerçeve (Framework)</div>
                 <div class="value">Spring Boot 3.5.6</div>
             </div>
             <div class="info-item">
-                <div class="label">Test Framework</div>
+                <div class="label">Test Altyapısı</div>
                 <div class="value">JUnit 5 + Mockito</div>
             </div>
         </div>
 
-        <div class="section-title">Code Coverage</div>
+        <div class="section-title">Kod Kapsaması</div>
         <div class="coverage-section">
             <div class="coverage-bar">
                 <div class="coverage-fill" style="width: {{COVERAGE}}%;"></div>
             </div>
             <div class="coverage-text">
-                <span>Minimum requirement: 30%</span>
+                <span>Minimum gereksinim: %30</span>
                 <span class="percent">{{COVERAGE}}%</span>
             </div>
         </div>
 
-        <div class="section-title">Test Suites</div>
+        <div class="section-title">Test Grupları</div>
         <div class="table-wrap">
             <table class="data-table">
                 <thead>
                 <tr>
-                    <th>Test Suite</th>
-                    <th>Tests</th>
-                    <th>Status</th>
+                    <th>Test Grubu</th>
+                    <th>Test Sayısı</th>
+                    <th>Durum</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -475,14 +462,14 @@
             </table>
         </div>
 
-        <div class="section-title">Test Details</div>
+        <div class="section-title">Test Detayları</div>
         <div class="table-wrap">
             <table class="data-table">
                 <thead>
                 <tr>
-                    <th>Test Name</th>
-                    <th>Duration</th>
-                    <th>Status</th>
+                    <th>Test Adı</th>
+                    <th>Süre</th>
+                    <th>Durum</th>
                 </tr>
                 </thead>
                 <tbody>

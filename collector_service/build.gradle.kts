@@ -60,7 +60,7 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
-tasks.named<JacocoReport>("jacocoTestReport") {
+tasks.withType<JacocoReport> {
     dependsOn("test")
 
     reports {
@@ -69,40 +69,11 @@ tasks.named<JacocoReport>("jacocoTestReport") {
         html.required.set(true)
         html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco"))
     }
-
-    afterEvaluate {
-        classDirectories.setFrom(
-            files(classDirectories.files.map {
-                fileTree(it) {
-                    exclude(
-                        "**/config/**",
-                        "**/entity/**",
-                        "**/dto/**",
-                        "**/*Application.class"
-                    )
-                }
-            })
-        )
-    }
 }
 
-tasks.named<JacocoCoverageVerification>("jacocoTestCoverageVerification") {
+tasks.withType<JacocoCoverageVerification> {
     dependsOn("test")
 
-    afterEvaluate {
-        classDirectories.setFrom(
-            files(classDirectories.files.map {
-                fileTree(it) {
-                    exclude(
-                        "**/config/**",
-                        "**/entity/**",
-                        "**/dto/**",
-                        "**/*Application.class"
-                    )
-                }
-            })
-        )
-    }
 
     violationRules {
         rule {
@@ -163,12 +134,13 @@ tasks.register("generatePdfReport") {
     group = "verification"
     description = "Generates a professional PDF-ready HTML test report"
 
-    dependsOn("test")
+    dependsOn("test", "jacocoTestReport")
 
     doLast {
         val testResultsDir = file("build/test-results/test")
         val templateFile = file("src/test/resources/test-report-template.html")
         val outputFile = file("build/reports/test-report.html")
+        val jacocoCsvFile = file("build/reports/jacoco/test/jacocoTestReport.csv")
 
         var totalTests = 0
         var passedTests: Int
@@ -221,6 +193,28 @@ tasks.register("generatePdfReport") {
         passedTests = totalTests - failedTests
         val successRate = if (totalTests > 0) (passedTests * 100 / totalTests) else 0
 
+        // Parse JaCoCo CSV for coverage
+        var coverage = 0
+        if (jacocoCsvFile.exists()) {
+            val lines = jacocoCsvFile.readLines()
+            if (lines.size > 1) {
+                var totalInstructions = 0L
+                var coveredInstructions = 0L
+                lines.drop(1).forEach { line ->
+                    val columns = line.split(",")
+                    if (columns.size >= 5) {
+                        val missed = columns[3].toLongOrNull() ?: 0
+                        val covered = columns[4].toLongOrNull() ?: 0
+                        totalInstructions += missed + covered
+                        coveredInstructions += covered
+                    }
+                }
+                if (totalInstructions > 0) {
+                    coverage = ((coveredInstructions * 100) / totalInstructions).toInt()
+                }
+            }
+        }
+
         // Build test suites table
         val suitesHtml = StringBuilder()
         testSuites.forEach { (suite, data) ->
@@ -243,7 +237,7 @@ tasks.register("generatePdfReport") {
         html = html.replace("{{PASSED_TESTS}}", passedTests.toString())
         html = html.replace("{{FAILED_TESTS}}", failedTests.toString())
         html = html.replace("{{SUCCESS_RATE}}", successRate.toString())
-        html = html.replace("{{COVERAGE}}", "30") // JaCoCo'dan alınabilir
+        html = html.replace("{{COVERAGE}}", coverage.toString())
         html = html.replace("{{TEST_SUITES}}", suitesHtml.toString())
         html = html.replace("{{TEST_DETAILS}}", testDetails.toString())
 

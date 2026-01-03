@@ -90,6 +90,72 @@ public class OutboxEventPubliserEvent {
             verify(outBoxEventRepository).save(captor.capture());
             assertThat(captor.getValue().getEventType()).isEqualTo("Started");
         }
+
+        @Test
+        @DisplayName("publishUpdated should use 'Updated' event type")
+        void publishUpdated_ShouldUseUpdatedEventType() {
+            Meeting meeting = Meeting.builder().id(1L).title("Updated Meeting").build();
+            when(outBoxEventRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+            outboxEventPublisher.publishUpdated(meeting, "1", "Meeting");
+
+            ArgumentCaptor<OutBoxEvent> captor = ArgumentCaptor.forClass(OutBoxEvent.class);
+            verify(outBoxEventRepository).save(captor.capture());
+            assertThat(captor.getValue().getEventType()).isEqualTo("Updated");
+            assertThat(captor.getValue().getPayload()).contains("Updated Meeting");
+        }
+
+        @Test
+        @DisplayName("publishEnded should use 'Ended' event type")
+        void publishEnded_ShouldUseEndedEventType() {
+            Meeting meeting = Meeting.builder().id(1L).build();
+            when(outBoxEventRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+            outboxEventPublisher.publishEnded(meeting, "1", "Meeting");
+
+            ArgumentCaptor<OutBoxEvent> captor = ArgumentCaptor.forClass(OutBoxEvent.class);
+            verify(outBoxEventRepository).save(captor.capture());
+            assertThat(captor.getValue().getEventType()).isEqualTo("Ended");
+        }
     }
 
+    @Nested
+    @DisplayName("Event Payload Tests")
+    class EventPayloadTests {
+
+        @Test
+        @DisplayName("Event payload should contain all aggregate fields")
+        void publishEvent_ShouldSerializeAllFields() {
+            Meeting meeting = Meeting.builder()
+                    .id(1L)
+                    .platform("DISCORD")
+                    .title("Team Standup")
+                    .build();
+
+            when(outBoxEventRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+            outboxEventPublisher.publishCreated(meeting, "1", "Meeting");
+
+            ArgumentCaptor<OutBoxEvent> captor = ArgumentCaptor.forClass(OutBoxEvent.class);
+            verify(outBoxEventRepository).save(captor.capture());
+
+            String payload = captor.getValue().getPayload();
+            assertThat(payload).contains("DISCORD");
+            assertThat(payload).contains("Team Standup");
+        }
+
+        @Test
+        @DisplayName("Event should have createdAt timestamp")
+        void publishEvent_ShouldHaveTimestamp() {
+            Meeting meeting = Meeting.builder().id(1L).build();
+            when(outBoxEventRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+            outboxEventPublisher.publishCreated(meeting, "1", "Meeting");
+
+            ArgumentCaptor<OutBoxEvent> captor = ArgumentCaptor.forClass(OutBoxEvent.class);
+            verify(outBoxEventRepository).save(captor.capture());
+
+            assertThat(captor.getValue().getCreatedAt()).isNotNull();
+        }
+    }
 }
