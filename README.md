@@ -173,7 +173,7 @@ Dashboard iki ana bölümden oluşur:
 - **Refresh Butonu**: Yeni toplantı özetlerini ve görevleri yükler
 - **Export Butonu**: Toplantı özetlerini dışa aktarır
 
-![Dashboard Ana Ekran](docs/images/dashboard-main.png)
+![Dashboard Ana Ekran](images/dashboard.png)
 
 #### Toplantı Detayları
 
@@ -192,11 +192,10 @@ Bir toplantı kartına tıkladığınızda detay sayfası açılır:
 - Toplantıdan çıkarılan tüm görevler
 - Görev detayları ve atanan kişiler
 
-![Toplantı Detayları](docs/images/dashboard-detail.png)
+![Toplantı Detayları](images/dashboard%20ve%20summary.png)
 
 #### Özellikler
 
-- **Arama**: Header'daki arama çubuğu ile toplantı ve görev arayabilirsiniz
 - **Platform Filtresi**: Sadece belirli platformlardaki toplantıları görüntüleyebilirsiniz (Discord, Zoom, UI)
 - **Toplantı Yükleme**: Upload butonu ile Zoom, Google Meet veya Teams toplantı kayıtlarını yükleyebilirsiniz
 - **Dil Seçimi**: Arayüz dilini değiştirebilirsiniz
@@ -270,26 +269,6 @@ kafka-tabanli-toplanti-ozetleyici/
 └── README.md                 # Bu dosya
 ```
 
-## Geliştirme
-
-### Yerel Geliştirme
-
-Servisleri ayrı ayrı çalıştırmak için:
-
-```bash
-# Gateway API
-cd gateway_api
-./gradlew bootRun
-
-# Collector Service
-cd collector_service
-./gradlew bootRun
-
-# AI Service
-cd ai_service
-./gradlew bootRun
-```
-
 ## Güvenlik
 
 - JWT tabanlı kimlik doğrulama
@@ -299,15 +278,3 @@ cd ai_service
 ## Lisans
 
 Bu proje [LICENSE](LICENSE) dosyasında belirtilen lisans altında lisanslanmıştır.
-
-## Katkıda Bulunma
-
-1. Fork edin
-2. Feature branch oluşturun (`git checkout -b feature/amazing-feature`)
-3. Commit edin (`git commit -m 'Add amazing feature'`)
-4. Push edin (`git push origin feature/amazing-feature`)
-5. Pull Request açın
-
-## İletişim
-
-Sorularınız veya önerileriniz için issue açabilirsiniz.
