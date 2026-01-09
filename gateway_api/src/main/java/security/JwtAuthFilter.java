@@ -61,10 +61,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.debug("Kullanici dogrulandi: {} - URI: {}", username, request.getRequestURI());
+                log.debug("User authenticated: {} - URI: {}", username, request.getRequestURI());
             }
         } catch (Exception e) {
-            log.error("Kullanici dogrulama hatasi: {}", e.getMessage());
+            log.error("User authentication error: {}", e.getMessage());
         }
 
         filterChain.doFilter(request, response);

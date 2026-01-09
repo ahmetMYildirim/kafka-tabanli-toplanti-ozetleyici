@@ -37,7 +37,7 @@ public class KafkaConfig {
 
     @Bean
     public KafkaTemplate<String, Object> kafkaTemplate() {
-        return  new KafkaTemplate<>(producerFactory());
+        return new KafkaTemplate<>(producerFactory());
     }
 
     @Bean
@@ -63,9 +63,29 @@ public class KafkaConfig {
         return TopicBuilder.name("processed-voice")
                 .partitions(6).replicas(1).build();
     }
+
     @Bean
-    public NewTopic zoomMeetingsTopic() {
-        return TopicBuilder.name("zoom-meeting-events")
+    public NewTopic meetingMediaTopic() {
+        return TopicBuilder.name("meeting-media")
+                .partitions(6).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic processedSummaryTopic() {
+        return TopicBuilder.name("processed-summary")
+                .partitions(6).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic processedTranscriptionTopic() {
+        return TopicBuilder.name("processed-transcription")
+                .partitions(6).replicas(1).build();
+    }
+
+    @Bean
+    public NewTopic processedActionItemsTopic() {
+        return TopicBuilder.name("processed-action-items")
                 .partitions(6).replicas(1).build();
     }
 }
+

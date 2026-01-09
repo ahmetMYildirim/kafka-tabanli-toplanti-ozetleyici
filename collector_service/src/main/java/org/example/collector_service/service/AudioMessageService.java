@@ -16,9 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
  * Ses dosyalarını kaydeder ve outbox event'leri oluşturur.
  * 
  * Sorumluluklar:
- * - Ses kaydı persistance
+ * - Ses kaydı persistance (kalıcı hale getirme)
  * - Transkript güncelleme
  * - Outbox event yayınlama
+ * 
+ * İş Akışı:
+ * 1. Discord/Zoom bot'tan ses kaydı alınır
+ * 2. AudioMessage entity veritabanına kaydedilir
+ * 3. OutboxEventPublisher ile Kafka'ya event gönderilir
+ * 4. AI servisi event'i alır ve transkripsiyon yapar
  * 
  * @author Ahmet
  * @version 1.0
@@ -32,9 +38,13 @@ public class AudioMessageService {
     private final OutboxEventPublisher outboxEventPublisher;
 
     /**
-     * Ses mesajını kaydeder ve AudioMessageCreated event'i oluşturur.
+     * Ses mesajını işler ve veritabanına kaydeder, ardından AudioMessageCreated event'i oluşturur.
      * 
-     * @param audioMessage Kaydedilecek ses mesajı
+     * Bu metod transactional olarak çalışır; hem veritabanı kaydı hem de outbox event
+     * aynı transaction içinde gerçekleşir. Bu sayede tutarlılık garantisi sağlanır.
+     * 
+     * @param audioMessage Kaydedilecek ses mesajı (platform, channelId, author, audioUrl gibi bilgileri içerir)
+     * @throws org.springframework.dao.DataAccessException Veritabanı hatası durumunda
      */
     @Transactional
     public void processAndSaveAudioMessage(AudioMessage audioMessage) {
@@ -46,13 +56,19 @@ public class AudioMessageService {
                 "AudioMessage"
         );
         
-        log.debug("Ses mesajı kaydedildi: id={}, author={}", saved.getId(), saved.getAuthor());
+        log.debug("Audio message saved: id={}, author={}", saved.getId(), saved.getAuthor());
     }
 
     /**
      * Ses mesajının transkriptini günceller ve AudioMessageUpdated event'i oluşturur.
      * 
-     * @param audioMessage Güncellenecek ses mesajı (transcription ve audioUrl alanları)
+     * AI servisi tarafından transkripsiyon tamamlandığında bu metod çağrılır.
+     * Mevcut ses mesajı bulunur, transcription alanı güncellenir ve 
+     * güncelleme event'i Kafka'ya gönderilir.
+     * 
+     * @param audioMessage Güncellenecek ses mesajı (id, transcription ve audioUrl alanları zorunlu)
+     * @throws MediaAssetNotFoundException Belirtilen ID ile ses mesajı bulunamazsa
+     * @throws org.springframework.dao.DataAccessException Veritabanı hatası durumunda
      */
     @Transactional
     public void updateAudioMessage(AudioMessage audioMessage) {
@@ -70,6 +86,6 @@ public class AudioMessageService {
                 "AudioMessage"
         );
 
-        log.debug("Ses mesajı güncellendi: id={}", updated.getId());
+        log.debug("Audio message updated: id={}", updated.getId());
     }
 }

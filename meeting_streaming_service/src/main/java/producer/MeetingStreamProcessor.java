@@ -17,6 +17,11 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 
 
+/**
+ * MeetingStreamProcessor - Kafka Streams ile toplantı mesajlarını işleyen servis
+ * @author Ahmet
+ * @version 1.0
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -34,6 +39,11 @@ public class MeetingStreamProcessor {
     @Value("${kafka.topics.processed-voice}")
     private String processedVoiceTopic;
 
+    /**
+     * Discord mesajları için Kafka Streams topology'sini oluşturur.
+     * @param builder Kafka Streams builder (Spring tarafından inject edilir)
+     * @return KStream<String, DiscordMessageEvent> (downstream işlemler için)
+     */
     @Bean
     public KStream<String, DiscordMessageEvent> discordMessageStream(StreamsBuilder builder) {
         JsonSerde<DiscordMessageEvent> messageSerde = new JsonSerde<>(DiscordMessageEvent.class);
@@ -46,7 +56,7 @@ public class MeetingStreamProcessor {
 
         messageEventKStream
                 .groupByKey()
-                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMinutes(5)))
+                .windowedBy(TimeWindows.ofSizeWithNoGrace(Duration.ofMinutes(5))) // 5 dakikalık pencere
                 .aggregate(
                         () -> "",
                         (key, message, aggregate) -> {
@@ -59,7 +69,10 @@ public class MeetingStreamProcessor {
                 )
                 .toStream()
                 .map((windowedKey, aggregatedMessages) -> {
-                    log.info("Processing windowed messages for channel: {}", windowedKey.key());
+                    log.info("Processing windowed messages: channel={}, windowStart={}, windowEnd={}", 
+                            windowedKey.key(), 
+                            windowedKey.window().startTime(), 
+                            windowedKey.window().endTime());
 
                     ProcessedMeetingData processed = ProcessedMeetingData.builder()
                             .sourceType("DISCORD_MESSAGES")

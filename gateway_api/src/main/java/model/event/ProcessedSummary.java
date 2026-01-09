@@ -51,7 +51,7 @@ public class ProcessedSummary {
     private List<String> keyPoints;
     
     /** Toplantıya katılan kişilerin listesi */
-    private List<String> patricipants;
+    private List<String> participants;
     
     /** Toplantının başlangıç zamanı - UTC formatında */
     private Instant meetingStartTime;

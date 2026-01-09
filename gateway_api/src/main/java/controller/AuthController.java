@@ -14,20 +14,34 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import security.JwtTokenProvider;
 
 /**
- * AuthController - Kullanıcı giriş ve token yönetimi
+ * AuthController - Kullanıcı kimlik doğrulama ve token yönetimi kontrolcüsü
  * 
- * Bu kontrolcü, sistemde kullanıcı kimlik doğrulama işlemlerini yönetir:
- * - Kullanıcı girişi ve JWT token oluşturma
- * - Token yenileme (refresh)
- * - Oturum doğrulama
+ * Bu kontrolcü, sistemde kullanıcı authentication işlemlerini yönetir.
+ * JWT (JSON Web Token) tabanlı stateless authentication kullanılır.
+ * 
+ * Sunulan Endpoint'ler:
+ * - POST /api/v1/auth/login - Kullanıcı girişi ve JWT token oluşturma
+ * - POST /api/v1/auth/refresh - Token yenileme (refresh token)
  * 
  * Güvenlik Özellikleri:
- * - BCrypt ile şifre hashleme
- * - JWT token tabanlı kimlik doğrulama
- * - Token süresi yapılandırması
+ * - JWT token tabanlı kimlik doğrulama (stateless)
+ * - BCrypt ile şifre hashleme (planned - şu an demo mode)
+ * - Token süre sınırlaması (configurable via application.properties)
+ * - Rate limiting (RateLimitFilter ile korunur)
  * 
- * Not: Demo amaçlı sabit kullanıcı bilgileri kullanılmaktadır.
- * Üretim ortamında veritabanı entegrasyonu yapılmalıdır.
+ * Demo Kullanıcı Bilgileri:
+ * - Username: admin
+ * - Password: admin123
+ * 
+ * Önemli Not: 
+ * Demo amaçlı sabit kullanıcı bilgileri kullanılmaktadır.
+ * Üretim (production) ortamında mutlaka veritabanı entegrasyonu
+ * ve gerçek kullanıcı yönetimi implementasyonu yapılmalıdır.
+ * 
+ * Token Yapısı:
+ * - Header: Algorithm (HS256)
+ * - Payload: username, iat, exp
+ * - Signature: HMAC SHA256 with secret key
  * 
  * @author Ahmet
  * @version 1.0
@@ -36,7 +50,7 @@ import security.JwtTokenProvider;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Kimlik_Dogrulama", description = "Kullanici giris, token olusturma ve yenileme endpointleri")
+@Tag(name = "Authentication", description = "User login, token generation and refresh endpoints")
 public class AuthController {
     
     private final JwtTokenProvider jwtTokenProvider;
@@ -49,27 +63,39 @@ public class AuthController {
      * Kullanıcı giriş işlemi yapar ve JWT token döndürür.
      * 
      * İşlem Akışı:
-     * 1. Kullanıcı adı ve şifre kontrolü
-     * 2. Başarılı ise JWT token oluşturma
-     * 3. Token ve kullanıcı bilgilerini döndürme
+     * 1. LoginRequest validation (@Valid annotation ile)
+     * 2. Kullanıcı adı ve şifre kontrolü (demo: hardcoded credentials)
+     * 3. Başarılı ise JWT token oluşturma (JwtTokenProvider ile)
+     * 4. Token ve kullanıcı bilgilerini LoginResponse olarak döndürme
      * 
-     * @param loginRequest Kullanıcı adı ve şifre içeren istek
-     * @return JWT token ve kullanıcı bilgileri veya hata mesajı
+     * Token İçeriği:
+     * - accessToken: JWT string (HS256 signed)
+     * - tokenType: "Bearer" (OAuth 2.0 standard)
+     * - expiresIn: Token geçerlilik süresi (saniye cinsinden)
+     * - username: Kullanıcı adı
+     * 
+     * Güvenlik:
+     * - Rate limiting uygulanır (max 5 request/min)
+     * - Başarısız girişler loglanır
+     * - Production'da brute-force protection eklenmeli
+     * 
+     * @param loginRequest Kullanıcı adı ve şifre içeren istek body'si
+     * @return JWT token ve kullanıcı bilgileri (200 OK) veya hata mesajı (400 Bad Request)
      */
     @PostMapping("/login")
-    @Operation(summary = "Kullanici girisi - JWT token olusturur")
+    @Operation(summary = "User login - Generates JWT token")
     public ResponseEntity<ApiResponse<LoginResponse>> login(
             @Valid @RequestBody LoginRequest loginRequest) {
         
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
         
-        log.info("Giris denemesi. Kullanici: {}", username);
+        log.info("Login attempt. Username: {}", username);
         
         if (!DEMO_USERNAME.equals(username) || !DEMO_PASSWORD.equals(password)) {
-            log.warn("Basarisiz giris denemesi. Kullanici: {}", username);
+            log.warn("Failed login attempt. Username: {}", username);
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.failure("Gecersiz kullanici adi veya sifre"));
+                    .body(ApiResponse.failure("Invalid username or password"));
         }
         
         String token = jwtTokenProvider.generateToken(username);
@@ -82,34 +108,44 @@ public class AuthController {
                 .username(username)
                 .build();
         
-        log.info("Basarili giris. Kullanici: {}", username);
+        log.info("Successful login. Username: {}", username);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
-     * Mevcut JWT token'ı yenileyerek yeni token döndürür.
+     * Mevcut JWT token'ı yenileyerek yeni token döndürür (refresh token mechanism).
      * 
      * İşlem Akışı:
-     * 1. Mevcut token geçerliliği kontrolü
-     * 2. Token'dan kullanıcı bilgisi çıkarma
-     * 3. Yeni token oluşturma ve döndürme
+     * 1. Authorization header'dan Bearer token çıkarılır
+     * 2. Mevcut token geçerliliği kontrolü (signature, expiration)
+     * 3. Token'dan kullanıcı bilgisi extract edilir
+     * 4. Yeni JWT token oluşturulur (yeni expiration time ile)
+     * 5. Yeni token döndürülür
      * 
-     * @param authHeader Authorization header (Bearer token)
-     * @return Yenilenmiş JWT token veya hata mesajı
+     * Kullanım Senaryosu:
+     * - Frontend, token süresi dolmadan (örn. 5 dk önce) bu endpoint'i çağırır
+     * - Seamless user experience sağlanır (logout olmadan token yenilenir)
+     * - Sliding window authentication pattern
+     * 
+     * Authorization Header Formatı:
+     * "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+     * 
+     * @param authHeader Authorization header (Bearer token formatında)
+     * @return Yenilenmiş JWT token (200 OK) veya hata mesajı (400 Bad Request)
      */
     @PostMapping("/refresh")
-    @Operation(summary = "JWT token yenileme - Suresi dolmadan onceki tokeni yeniler")
+    @Operation(summary = "Refresh JWT token - Renews token before expiration")
     public ResponseEntity<ApiResponse<LoginResponse>> refresh(
             @RequestHeader("Authorization") String authHeader) {
         
-        String token = authHeader.substring(7);
+        String token = authHeader.substring(7); 
         
-        log.debug("Token yenileme istegi alindi");
+        log.debug("Token refresh request received");
         
         if (!jwtTokenProvider.validateToken(token)) {
-            log.warn("Gecersiz token ile yenileme denemesi");
+            log.warn("Invalid token refresh attempt");
             return ResponseEntity.badRequest()
-                    .body(ApiResponse.failure("Gecersiz veya suresi dolmus token"));
+                    .body(ApiResponse.failure("Invalid or expired token"));
         }
         
         String username = jwtTokenProvider.getUsernameToken(token);
@@ -123,7 +159,7 @@ public class AuthController {
                 .username(username)
                 .build();
         
-        log.info("Token basariyla yenilendi. Kullanici: {}", username);
-        return ResponseEntity.ok(ApiResponse.success(response, "Token basariyla yenilendi"));
+        log.info("Token refreshed successfully. Username: {}", username);
+        return ResponseEntity.ok(ApiResponse.success(response, "Token refreshed successfully"));
     }
 }

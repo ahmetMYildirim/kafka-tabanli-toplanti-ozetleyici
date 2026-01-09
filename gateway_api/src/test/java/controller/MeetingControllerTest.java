@@ -63,14 +63,14 @@ class MeetingControllerTest {
         @Test
         @DisplayName("Should return all meetings without filter")
         void getAllMeetings_WithoutFilter_ShouldReturnAll() {
-            // Given
+            
             when(dataStore.getLastSummaries(20)).thenReturn(List.of(testSummary));
 
-            // When
+            
             ResponseEntity<ApiResponse<List<ProcessedSummary>>> response =
                     meetingController.getAllMeetings(null, 20);
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().getData()).hasSize(1);
@@ -80,14 +80,14 @@ class MeetingControllerTest {
         @Test
         @DisplayName("Should filter meetings by platform")
         void getAllMeetings_WithPlatformFilter_ShouldFilterCorrectly() {
-            // Given
+            
             when(dataStore.getSummariesByPlatform("DISCORD")).thenReturn(List.of(testSummary));
 
-            // When
+            
             ResponseEntity<ApiResponse<List<ProcessedSummary>>> response =
                     meetingController.getAllMeetings("DISCORD", 20);
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody().getData()).hasSize(1);
             assertThat(response.getBody().getData().get(0).getPlatform()).isEqualTo("DISCORD");
@@ -97,14 +97,14 @@ class MeetingControllerTest {
         @Test
         @DisplayName("Should handle empty platform filter")
         void getAllMeetings_WithEmptyPlatform_ShouldReturnAll() {
-            // Given
+            
             when(dataStore.getLastSummaries(10)).thenReturn(List.of(testSummary));
 
-            // When
+            
             ResponseEntity<ApiResponse<List<ProcessedSummary>>> response =
                     meetingController.getAllMeetings("", 10);
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             verify(dataStore).getLastSummaries(10);
         }
@@ -117,16 +117,16 @@ class MeetingControllerTest {
         @Test
         @DisplayName("Should return meeting detail when found")
         void getMeetingDetail_WhenExists_ShouldReturnDetail() {
-            // Given
+            
             when(dataStore.getSummary("meeting-123")).thenReturn(Optional.of(testSummary));
             when(dataStore.getTranscription("meeting-123")).thenReturn(Optional.of(testTranscription));
             when(dataStore.getActionItem("meeting-123")).thenReturn(Optional.of(testActionItem));
 
-            // When
+            
             ResponseEntity<ApiResponse<MeetingDetailDTO>> response =
                     meetingController.getMeetingDetail("meeting-123");
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().getData().getProcessedSummary()).isNotNull();
@@ -137,14 +137,14 @@ class MeetingControllerTest {
         @Test
         @DisplayName("Should return 404 when meeting not found")
         void getMeetingDetail_WhenNotExists_ShouldReturn404() {
-            // Given
+            
             when(dataStore.getSummary("non-existent")).thenReturn(Optional.empty());
 
-            // When
+            
             ResponseEntity<ApiResponse<MeetingDetailDTO>> response =
                     meetingController.getMeetingDetail("non-existent");
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
     }
@@ -156,14 +156,14 @@ class MeetingControllerTest {
         @Test
         @DisplayName("Should return summary when found")
         void getMeetingSummary_WhenExists_ShouldReturnSummary() {
-            // Given
+            
             when(dataStore.getSummary("meeting-123")).thenReturn(Optional.of(testSummary));
 
-            // When
+            
             ResponseEntity<ApiResponse<ProcessedSummary>> response =
                     meetingController.getMeetingSummary("meeting-123");
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody().getData().getSummary()).isEqualTo("Test özeti");
         }
@@ -171,14 +171,14 @@ class MeetingControllerTest {
         @Test
         @DisplayName("Should return 404 when summary not found")
         void getMeetingSummary_WhenNotExists_ShouldReturn404() {
-            // Given
+            
             when(dataStore.getSummary("non-existent")).thenReturn(Optional.empty());
 
-            // When
+            
             ResponseEntity<ApiResponse<ProcessedSummary>> response =
                     meetingController.getMeetingSummary("non-existent");
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
     }
@@ -190,14 +190,14 @@ class MeetingControllerTest {
         @Test
         @DisplayName("Should return transcription when found")
         void getMeetingTranscription_WhenExists_ShouldReturnTranscription() {
-            // Given
+            
             when(dataStore.getTranscription("meeting-123")).thenReturn(Optional.of(testTranscription));
 
-            // When
+            
             ResponseEntity<ApiResponse<ProcessedTranscription>> response =
                     meetingController.getMeetingTranscription("meeting-123");
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody().getData().getFullTranscription()).isEqualTo("Test transkript");
         }
@@ -205,14 +205,14 @@ class MeetingControllerTest {
         @Test
         @DisplayName("Should return 404 when transcription not found")
         void getMeetingTranscription_WhenNotExists_ShouldReturn404() {
-            // Given
+            
             when(dataStore.getTranscription("non-existent")).thenReturn(Optional.empty());
 
-            // When
+            
             ResponseEntity<ApiResponse<ProcessedTranscription>> response =
                     meetingController.getMeetingTranscription("non-existent");
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
     }

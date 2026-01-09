@@ -143,7 +143,7 @@ class DataStoreTest {
             datastore.saveActionItems(actionItem);
             Optional<ProcessedActionItem> result = datastore.getActionItem("meeting-789");
 
-            // Then
+            
             assertThat(result).isPresent();
             assertThat(result.get().getActionItems()).hasSize(2);
         }

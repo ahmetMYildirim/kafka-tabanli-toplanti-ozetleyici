@@ -26,6 +26,7 @@ import java.util.HexFormat;
 import java.util.UUID;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,25 +58,34 @@ public class MediaIngestService {
             try{
                 String checksum = calculateCheckSum(file.getBytes());
 
-                if(mediaAssetRepository.existsByChecksum(checksum)){
-                    log.warn("Duplicate file upload attempt detected. Checksum: {}", checksum);
-                    throw new DuplicateFileException("This file has already been uploaded. Checksum: " + checksum);
+                
+                Optional<MediaAsset> existingAssetOpt = mediaAssetRepository.findByChecksum(checksum);
+                MediaAsset mediaAsset;
+                boolean isDuplicate = false;
+                
+                if(existingAssetOpt.isPresent()){
+                    log.info("Duplicate file detected. Using existing media asset. Checksum: {}, FileKey: {}", 
+                            checksum, existingAssetOpt.get().getFileKey());
+                    mediaAsset = existingAssetOpt.get();
+                    isDuplicate = true;
+                } else {
+                    
+                    String fileKey = generateFileKey(request.getPlatform());
+                    String savedPath = saveFile(file, fileKey, request.getPlatform());
+
+                    mediaAsset = MediaAsset.builder()
+                            .fileKey(fileKey)
+                            .mimeType(file.getContentType())
+                            .originalFileName(file.getOriginalFilename())
+                            .fileSize(file.getSize())
+                            .checksum(checksum)
+                            .storagePath(savedPath)
+                            .status(MediaAsset.MediaStatus.PENDING)
+                            .build();
+
+                    mediaAsset = mediaAssetRepository.save(mediaAsset);
+                    log.info("New media asset created. FileKey: {}", fileKey);
                 }
-
-                String fileKey = generateFileKey(request.getPlatform());
-                String savedPath = saveFile(file, fileKey, request.getPlatform());
-
-                MediaAsset mediaAsset = MediaAsset.builder()
-                        .fileKey(fileKey)
-                        .mimeType(file.getContentType())
-                        .originalFileName(file.getOriginalFilename())
-                        .fileSize(file.getSize())
-                        .checksum(checksum)
-                        .storagePath(savedPath)
-                        .status(MediaAsset.MediaStatus.PENDING)
-                        .build();
-
-                mediaAsset = mediaAssetRepository.save(mediaAsset);
 
                 MeetingMedia meetingMedia = MeetingMedia.builder()
                         .meetingId(request.getMeetingId())
@@ -93,13 +103,19 @@ public class MediaIngestService {
                 meetingMedia = meetingMediaRepository.save(meetingMedia);
 
                 saveToOutbox(mediaAsset,meetingMedia,request);
-                log.info("Media uploaded successfully. FileKey: {}", fileKey);
-
+                
+                String responseMessage = isDuplicate 
+                        ? "File already exists. Using existing media asset."
+                        : "File uploaded successfully.";
+                
+                log.info("Media processed successfully. FileKey: {}, Duplicate: {}", 
+                        mediaAsset.getFileKey(), isDuplicate);
+                
                 return MediaUploadResponse.builder()
                         .mediaStatusId(mediaAsset.getId())
-                        .fileKey(fileKey)
+                        .fileKey(mediaAsset.getFileKey())
                         .status("SUCCESS")
-                        .message("File uploaded successfully.")
+                        .message(responseMessage)
                         .uploadedAt(LocalDateTime.now())
                         .build();
 
@@ -148,7 +164,7 @@ public class MediaIngestService {
         Path filePath = platformDir.resolve(fileKey + fileExtension);
         Files.write(filePath, file.getBytes());
 
-        return filePath.toString();
+        return filePath.toAbsolutePath().toString();
     }
 
     private String getFileExtension(String filename){
@@ -162,11 +178,11 @@ public class MediaIngestService {
         try{
             Map<String, Object> payload = new HashMap<>();
             payload.put("eventId", UUID.randomUUID().toString());
-            payload.put("eventType", "MEDİA_UPLOADED");
+            payload.put("eventType", "MEDIA_UPLOADED");
             payload.put("platform", request.getPlatform().toUpperCase());
             payload.put("meetingId", request.getMeetingId());
             payload.put("fileKey", asset.getFileKey());
-            payload.put("storagePath", asset.getStoragePath());
+            payload.put("audioUrl", asset.getStoragePath());
             payload.put("mimeType", asset.getMimeType());
             payload.put("fileSize", asset.getFileSize());
             payload.put("meetingTitle", request.getMeetingTitle());

@@ -14,16 +14,24 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 /**
- * DashboardController - Ana sayfa istatistiklerini sunan REST API
+ * DashboardController - Ana sayfa istatistiklerini sunan REST API kontrolcüsü
  * 
  * Bu kontrolcü, UI dashboard sayfası için gerekli özet istatistikleri sağlar.
- * Toplantı sayıları, transkript sayıları ve görev istatistikleri döndürür.
+ * In-memory cache'den (dataStore) real-time istatistikler hesaplanır.
  * 
  * Sunulan Veriler:
- * - Toplam toplantı sayısı
- * - Platform bazlı toplantı dağılımı (Discord/Zoom)
- * - Toplam transkript sayısı
- * - Toplam görev sayısı
+ * - Toplam toplantı sayısı (total meetings count)
+ * - Platform bazlı toplantı dağılımı (Discord/Zoom/Teams breakdown)
+ * - Toplam transkript sayısı (processed transcriptions)
+ * - Toplam görev sayısı (action items count)
+ * - Son aktivite zamanı (last activity timestamp)
+ * 
+ * Veri Kaynağı:
+ * - In-memory dataStore (Kafka consumer'lardan beslenir)
+ * - Real-time güncel veriler
+ * - Veritabanına erişim olmaz (performance için)
+ * 
+ * Kullanım: Dashboard widget'ları bu endpoint'i polling ile çağırır
  * 
  * @author Ahmet
  * @version 1.0
@@ -32,7 +40,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/dashboard")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Dashboard", description = "Ana sayfa istatistikleri ve ozet bilgiler")
+@Tag(name = "Dashboard", description = "Home page statistics and summary information")
 public class DashboardController {
     
     private final dataStore dataStore;
@@ -40,23 +48,30 @@ public class DashboardController {
     /**
      * Dashboard için özet istatistikleri döndürür.
      * 
-     * Dönen veriler:
-     * - totalMeetings: Toplam toplantı sayısı
-     * - totalTranscriptions: Toplam transkript sayısı
-     * - totalActionItems: Toplam görev sayısı
-     * - discordMeetings: Discord toplantı sayısı
-     * - zoomMeetings: Zoom toplantı sayısı
+     * Bu metod, dataStore'dan anlık (real-time) istatistikleri hesaplar
+     * ve Map formatında döndürür. Frontend dashboard widget'ları tarafından
+     * periyodik olarak (her 10-30 saniyede) çağrılır.
      * 
-     * @return İstatistik verilerini içeren ApiResponse
+     * Dönen veriler (Map key'leri):
+     * - totalMeetings: Toplam toplantı sayısı (Integer)
+     * - totalTranscriptions: Toplam transkript sayısı (Integer)
+     * - totalActionItems: Toplam görev sayısı (Integer)
+     * - discordMeetings: Discord toplantı sayısı (Integer)
+     * - zoomMeetings: Zoom toplantı sayısı (Integer)
+     * - teamsMeetings: Teams toplantı sayısı (Integer, opsiyonel)
+     * 
+     * Performance: O(n) complexity, cache-based hesaplama (hızlı)
+     * 
+     * @return İstatistik verilerini içeren ApiResponse<Map<String, Object>>
      */
     @GetMapping("/stats")
-    @Operation(summary = "Dashboard istatistiklerini getir - Toplanti ve gorev sayilari")
+    @Operation(summary = "Get dashboard statistics - Meeting and task counts")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getDashboardStats() {
-        log.info("Dashboard istatistikleri istegi alindi");
+        log.info("Dashboard statistics request received");
         
         Map<String, Object> stats = dataStore.getUserStatistics();
         
-        log.debug("Dashboard istatistikleri: {}", stats);
+        log.debug("Dashboard statistics: {}", stats);
         
         return ResponseEntity.ok(ApiResponse.success(stats));
     }

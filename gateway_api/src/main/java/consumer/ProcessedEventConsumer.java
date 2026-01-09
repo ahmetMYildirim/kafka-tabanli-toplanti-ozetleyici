@@ -1,14 +1,19 @@
 package consumer;
 
 import cache.dataStore;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import model.event.ProcessedSummary;
 import model.event.ProcessedTranscription;
 import model.event.ProcessedActionItem;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import service.NotificationService;
-import org.springframework.kafka.annotation.KafkaListener;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * ProcessedEventConsumer - AI servisinden gelen verileri dinleyen Kafka consumer
@@ -36,6 +41,7 @@ public class ProcessedEventConsumer {
     
     private final dataStore dataStore;
     private final NotificationService notificationService;
+    private final ObjectMapper objectMapper;
 
     /**
      * AI servisinden gelen toplantı özetlerini işler.
@@ -53,15 +59,31 @@ public class ProcessedEventConsumer {
             groupId = "${spring.kafka.consumer.group-id}",
             containerFactory = "kafkaListenerContainerFactory"
     )
-    public void consumeSummary(ProcessedSummary summary) {
-        String meetingId = summary.getMeetingId();
-        log.info("Yeni toplanti ozeti alindi. Toplanti ID: {}, Platform: {}", 
-                meetingId, summary.getPlatform());
-        
-        dataStore.saveSummary(summary);
-        notificationService.notifyNewSummary(summary);
-        
-        log.debug("Toplanti ozeti basariyla islendi. ID: {}", meetingId);
+    public void consumeSummary(ConsumerRecord<String, Object> record) {
+        try {
+            Object payload = record.value();
+            ProcessedSummary summary;
+            
+            if (payload instanceof Map) {
+                summary = objectMapper.convertValue(payload, ProcessedSummary.class);
+            } else if (payload instanceof ProcessedSummary) {
+                summary = (ProcessedSummary) payload;
+            } else {
+                log.error("Unexpected payload type: {}", payload.getClass());
+                return;
+            }
+            
+            String meetingId = summary.getMeetingId();
+            log.info("New meeting summary received. Meeting ID: {}, Platform: {}", 
+                    meetingId, summary.getPlatform());
+            
+            dataStore.saveSummary(summary);
+            notificationService.notifyNewSummary(summary);
+            
+            log.debug("Meeting summary processed successfully. ID: {}", meetingId);
+        } catch (Exception e) {
+            log.error("Error processing summary: {}", record.value(), e);
+        }
     }
 
     /**
@@ -77,12 +99,12 @@ public class ProcessedEventConsumer {
     )
     public void consumeTranscription(ProcessedTranscription transcription) {
         String meetingId = transcription.getMeetingId();
-        log.info("Yeni transkript alindi. Toplanti ID: {}", meetingId);
+        log.info("New transcription received. Meeting ID: {}", meetingId);
         
         dataStore.saveTranscription(transcription);
         notificationService.notifyNewTranscript(transcription);
         
-        log.debug("Transkript basariyla islendi. ID: {}", meetingId);
+        log.debug("Transcription processed successfully. ID: {}", meetingId);
     }
 
     /**
@@ -96,13 +118,52 @@ public class ProcessedEventConsumer {
             groupId = "${spring.kafka.consumer.group-id}",
             containerFactory = "kafkaListenerContainerFactory"
     )
-    public void consumeActionItems(ProcessedActionItem actionItem) {
-        String meetingId = actionItem.getMeetingId();
-        log.info("Yeni gorev listesi alindi. Toplanti ID: {}", meetingId);
-        
-        dataStore.saveActionItems(actionItem);
-        notificationService.notifyNewActionItems(actionItem);
-        
-        log.debug("Gorev listesi basariyla islendi. ID: {}", meetingId);
+    public void consumeActionItems(ConsumerRecord<String, Object> record) {
+        try {
+            Object payload = record.value();
+            ProcessedActionItem actionItem;
+            
+            if (payload instanceof Map) {
+                Map<String, Object> map = (Map<String, Object>) payload;
+                
+                if (map.containsKey("taskItems")) {
+                    Object taskItemsObj = map.get("taskItems");
+                    List<String> actionItemsList = new java.util.ArrayList<>();
+                    
+                    if (taskItemsObj instanceof List) {
+                        List<?> taskItems = (List<?>) taskItemsObj;
+                        for (Object item : taskItems) {
+                            if (item instanceof Map) {
+                                Map<String, Object> taskMap = (Map<String, Object>) item;
+                                String title = taskMap.get("title") != null ? taskMap.get("title").toString() : "";
+                                String description = taskMap.get("description") != null ? taskMap.get("description").toString() : "";
+                                if (!title.isEmpty() || !description.isEmpty()) {
+                                    actionItemsList.add(title.isEmpty() ? description : title + ": " + description);
+                                }
+                            }
+                        }
+                    }
+                    
+                    map.put("actionItems", actionItemsList);
+                }
+                
+                actionItem = objectMapper.convertValue(map, ProcessedActionItem.class);
+            } else if (payload instanceof ProcessedActionItem) {
+                actionItem = (ProcessedActionItem) payload;
+            } else {
+                log.error("Unexpected payload type: {}", payload.getClass());
+                return;
+            }
+            
+            String meetingId = actionItem.getMeetingId();
+            log.info("New action items list received. Meeting ID: {}", meetingId);
+            
+            dataStore.saveActionItems(actionItem);
+            notificationService.notifyNewActionItems(actionItem);
+            
+            log.debug("Action items list processed successfully. ID: {}", meetingId);
+        } catch (Exception e) {
+            log.error("Error processing action items: {}", record.value(), e);
+        }
     }
 }

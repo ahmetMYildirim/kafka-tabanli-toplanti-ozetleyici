@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.toplanti.dashboard.controller.DashboardController"
+            stylesheets="@../css/main.css"
+            prefWidth="1400" prefHeight="900">
+
+    <!-- HEADER -->
+    <top>
+        <HBox styleClass="header" alignment="CENTER_LEFT" spacing="15">
+            <padding>
+                <Insets top="12" right="20" bottom="12" left="20"/>
+            </padding>
+
+            <Label text="📊" style="-fx-font-size: 24px;"/>
+            <Label fx:id="appTitleLabel" text="Meeting Summarizer Dashboard" styleClass="app-title"/>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <TextField fx:id="searchField" promptText="🔍 Search..." styleClass="search-box" prefWidth="200"/>
+
+            <Label fx:id="statsLabel" text="📊 Loading..." styleClass="stats-label"/>
+            <Label fx:id="connectionStatus" text="⚪ Connecting..." styleClass="connection-status"/>
+
+            <Separator orientation="VERTICAL"/>
+
+            <ComboBox fx:id="languageCombo" prefWidth="90"/>
+            <Button fx:id="themeToggleButton" text="🌙" onAction="#toggleTheme" styleClass="theme-button"/>
+
+            <Separator orientation="VERTICAL"/>
+
+            <HBox styleClass="user-info-panel" spacing="8" alignment="CENTER">
+                <Label text="👤"/>
+                <VBox spacing="2">
+                    <Label fx:id="userNameLabel" text="User" styleClass="user-name"/>
+                    <Label fx:id="userRoleLabel" text="Role" styleClass="role-badge"/>
+                </VBox>
+            </HBox>
+
+            <Button fx:id="logoutButton" text="🚪" onAction="#handleLogout" styleClass="logout-button"/>
+        </HBox>
+    </top>
+
+    <!-- SOL PANEL - Görevler -->
+    <left>
+        <VBox styleClass="task-panel" prefWidth="280">
+            <padding>
+                <Insets top="15" right="15" bottom="15" left="15"/>
+            </padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label fx:id="tasksPanelTitle" text="📋 My Tasks" styleClass="panel-title"/>
+            </HBox>
+
+            <Separator>
+                <VBox.margin>
+                    <Insets top="10" bottom="10"/>
+                </VBox.margin>
+            </Separator>
+
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="task-scroll">
+                <VBox fx:id="taskList" spacing="10">
+                    <padding>
+                        <Insets top="5" right="5" bottom="5" left="5"/>
+                    </padding>
+                </VBox>
+            </ScrollPane>
+        </VBox>
+    </left>
+
+    <!-- MERKEZ - Toplantı Listesi ve Detay -->
+    <center>
+        <VBox spacing="15">
+            <padding>
+                <Insets top="15" right="20" bottom="15" left="20"/>
+            </padding>
+
+            <!-- Üst: Toplantı Özet Listesi -->
+            <VBox styleClass="meeting-list-panel" VBox.vgrow="ALWAYS">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+
+                <HBox alignment="CENTER_LEFT" spacing="15">
+                    <Label fx:id="meetingsPanelTitle" text="📝 Meeting Summaries" styleClass="panel-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Label text="Platform:"/>
+                    <ComboBox fx:id="platformFilter" prefWidth="120"/>
+
+                    <Button text="📤 Upload" onAction="#uploadAudioFile" styleClass="upload-button" 
+                            style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                    <Button text="🔄 Refresh" onAction="#refreshMeetings" styleClass="refresh-button"/>
+                    <Button fx:id="exportButton" text="📥 Export" onAction="#exportToPdf" styleClass="export-button"/>
+                </HBox>
+
+                <Separator>
+                    <VBox.margin>
+                        <Insets top="10" bottom="10"/>
+                    </VBox.margin>
+                </Separator>
+
+                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="meeting-scroll">
+                    <FlowPane fx:id="meetingCards" hgap="15" vgap="15" alignment="TOP_LEFT" styleClass="meeting-cards-flow">
+                        <padding>
+                            <Insets top="5" right="5" bottom="5" left="5"/>
+                        </padding>
+                    </FlowPane>
+                </ScrollPane>
+            </VBox>
+
+            <!-- Alt: Seçili Toplantı Detayı -->
+            <VBox fx:id="detailPanel" styleClass="detail-panel" VBox.vgrow="ALWAYS" managed="false" visible="false">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="📖 Meeting Detail" styleClass="panel-title"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="📄 Export PDF" onAction="#exportToPdf" styleClass="export-button"/>
+                </HBox>
+
+                <Separator>
+                    <VBox.margin>
+                        <Insets top="10" bottom="10"/>
+                    </VBox.margin>
+                </Separator>
+
+                <TabPane VBox.vgrow="ALWAYS">
+                    <Tab text="📄 Summary" closable="false">
+                        <ScrollPane fitToWidth="true">
+                            <VBox fx:id="summaryContent" spacing="10">
+                                <padding>
+                                    <Insets top="10" right="10" bottom="10" left="10"/>
+                                </padding>
+                            </VBox>
+                        </ScrollPane>
+                    </Tab>
+
+                    <Tab text="🎙️ Transcription" closable="false">
+                        <ScrollPane fitToWidth="true">
+                            <TextArea fx:id="transcriptionText"
+                                      editable="false"
+                                      wrapText="true"
+                                      prefRowCount="15"
+                                      styleClass="transcription-text"/>
+                        </ScrollPane>
+                    </Tab>
+
+                    <Tab text="✅ Tasks" closable="false">
+                        <ScrollPane fitToWidth="true">
+                            <VBox fx:id="actionItemsList" spacing="10">
+                                <padding>
+                                    <Insets top="10" right="10" bottom="10" left="10"/>
+                                </padding>
+                            </VBox>
+                        </ScrollPane>
+                    </Tab>
+                </TabPane>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
+

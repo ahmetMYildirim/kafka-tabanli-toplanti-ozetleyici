@@ -35,6 +35,12 @@ public class ProcessedActionItem {
     /** Toplantının benzersiz kimliği */
     private String meetingId;
     
+    /** Discord kanal ID veya Zoom meeting ID */
+    private String channelId;
+    
+    /** Toplantı platformu: DISCORD veya ZOOM */
+    private String platform;
+    
     /** Toplantıdan çıkarılan görevlerin listesi */
     private List<String> actionItems;
     

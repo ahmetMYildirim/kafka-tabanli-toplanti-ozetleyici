@@ -81,7 +81,7 @@ public class MediaIngestServiceTest {
                 });
     }
 
-    // ===================================== Upload Media Tests ===============================================
+    
 
     @Nested
     @DisplayName("uploadMedia() tests")
@@ -210,7 +210,7 @@ public class MediaIngestServiceTest {
                     .hasRootCauseInstanceOf(DuplicateFileException.class);
         }
 
-        // ================================================ Update Status Tests ==========================================================
+        
 
         @Nested
         @DisplayName("updateMediaStatus() tests")

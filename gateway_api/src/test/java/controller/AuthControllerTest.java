@@ -36,7 +36,7 @@ class AuthControllerTest {
         @Test
         @DisplayName("Should return token for valid credentials")
         void login_WithValidCredentials_ShouldReturnToken() {
-            // Given
+            
             LoginRequest request = new LoginRequest();
             request.setUsername("admin");
             request.setPassword("admin123");
@@ -44,10 +44,10 @@ class AuthControllerTest {
             when(jwtTokenProvider.generateToken("admin")).thenReturn("test-jwt-token");
             when(jwtTokenProvider.getTokenExpirationMillis()).thenReturn(3600000L);
 
-            // When
+            
             ResponseEntity<ApiResponse<LoginResponse>> response = authController.login(request);
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().isSuccess()).isTrue();
@@ -59,15 +59,15 @@ class AuthControllerTest {
         @Test
         @DisplayName("Should return error for invalid username")
         void login_WithInvalidUsername_ShouldReturnError() {
-            // Given
+            
             LoginRequest request = new LoginRequest();
             request.setUsername("wronguser");
             request.setPassword("admin123");
 
-            // When
+            
             ResponseEntity<ApiResponse<LoginResponse>> response = authController.login(request);
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().isSuccess()).isFalse();
@@ -76,15 +76,15 @@ class AuthControllerTest {
         @Test
         @DisplayName("Should return error for invalid password")
         void login_WithInvalidPassword_ShouldReturnError() {
-            // Given
+            
             LoginRequest request = new LoginRequest();
             request.setUsername("admin");
             request.setPassword("wrongpassword");
 
-            // When
+            
             ResponseEntity<ApiResponse<LoginResponse>> response = authController.login(request);
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().isSuccess()).isFalse();
@@ -99,7 +99,7 @@ class AuthControllerTest {
         @Test
         @DisplayName("Should refresh valid token")
         void refresh_WithValidToken_ShouldReturnNewToken() {
-            // Given
+            
             String authHeader = "Bearer valid-token";
 
             when(jwtTokenProvider.validateToken("valid-token")).thenReturn(true);
@@ -107,10 +107,10 @@ class AuthControllerTest {
             when(jwtTokenProvider.generateToken("admin")).thenReturn("new-jwt-token");
             when(jwtTokenProvider.getTokenExpirationMillis()).thenReturn(3600000L);
 
-            // When
+            
             ResponseEntity<ApiResponse<LoginResponse>> response = authController.refresh(authHeader);
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().isSuccess()).isTrue();
@@ -120,15 +120,15 @@ class AuthControllerTest {
         @Test
         @DisplayName("Should return error for invalid token")
         void refresh_WithInvalidToken_ShouldReturnError() {
-            // Given
+            
             String authHeader = "Bearer invalid-token";
 
             when(jwtTokenProvider.validateToken("invalid-token")).thenReturn(false);
 
-            // When
+            
             ResponseEntity<ApiResponse<LoginResponse>> response = authController.refresh(authHeader);
 
-            // Then
+            
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
             assertThat(response.getBody()).isNotNull();
             assertThat(response.getBody().isSuccess()).isFalse();

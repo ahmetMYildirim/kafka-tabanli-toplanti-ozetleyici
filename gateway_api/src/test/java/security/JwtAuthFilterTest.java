@@ -49,17 +49,17 @@ class JwtAuthFilterTest {
         @Test
         @DisplayName("Should authenticate with valid token")
         void doFilterInternal_WithValidToken_ShouldAuthenticate() throws Exception {
-            // Given
+            
             String token = "valid-jwt-token";
             when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
             when(jwtTokenProvider.validateToken(token)).thenReturn(true);
             when(jwtTokenProvider.getUsernameToken(token)).thenReturn("testuser");
             when(request.getRequestURI()).thenReturn("/api/v1/meetings");
 
-            // When
+            
             jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
-            // Then
+            
             verify(filterChain).doFilter(request, response);
             assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
             assertThat(SecurityContextHolder.getContext().getAuthentication().getPrincipal())
@@ -69,15 +69,15 @@ class JwtAuthFilterTest {
         @Test
         @DisplayName("Should not authenticate with invalid token")
         void doFilterInternal_WithInvalidToken_ShouldNotAuthenticate() throws Exception {
-            // Given
+            
             String token = "invalid-token";
             when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
             when(jwtTokenProvider.validateToken(token)).thenReturn(false);
 
-            // When
+            
             jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
-            // Then
+            
             verify(filterChain).doFilter(request, response);
             assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
@@ -85,13 +85,13 @@ class JwtAuthFilterTest {
         @Test
         @DisplayName("Should continue filter chain without Authorization header")
         void doFilterInternal_WithoutAuthHeader_ShouldContinue() throws Exception {
-            // Given
+            
             when(request.getHeader("Authorization")).thenReturn(null);
 
-            // When
+            
             jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
-            // Then
+            
             verify(filterChain).doFilter(request, response);
             assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
@@ -99,13 +99,13 @@ class JwtAuthFilterTest {
         @Test
         @DisplayName("Should not authenticate with non-Bearer token")
         void doFilterInternal_WithNonBearerToken_ShouldNotAuthenticate() throws Exception {
-            // Given
+            
             when(request.getHeader("Authorization")).thenReturn("Basic sometoken");
 
-            // When
+            
             jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
-            // Then
+            
             verify(filterChain).doFilter(request, response);
             assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
@@ -113,15 +113,15 @@ class JwtAuthFilterTest {
         @Test
         @DisplayName("Should handle exception gracefully")
         void doFilterInternal_WhenExceptionThrown_ShouldContinueChain() throws Exception {
-            // Given
+            
             String token = "error-token";
             when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
             when(jwtTokenProvider.validateToken(token)).thenThrow(new RuntimeException("Token error"));
 
-            // When
+            
             jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
-            // Then
+            
             verify(filterChain).doFilter(request, response);
             assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
@@ -129,13 +129,13 @@ class JwtAuthFilterTest {
         @Test
         @DisplayName("Should handle empty Bearer token")
         void doFilterInternal_WithEmptyBearerToken_ShouldNotAuthenticate() throws Exception {
-            // Given
+            
             when(request.getHeader("Authorization")).thenReturn("Bearer ");
 
-            // When
+            
             jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
-            // Then
+            
             verify(filterChain).doFilter(request, response);
             assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }

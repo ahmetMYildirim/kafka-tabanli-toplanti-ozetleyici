@@ -1,37 +1,140 @@
-# =====================================================
-# Kafka Tabanlı Toplantı Özetleyici - Toplu .gitignore
-# =====================================================
+# ===================================================================
+# Kafka Tabanlı Toplantı Özetleyici - .gitignore
+# Güvenlik: Hassas bilgiler ve build dosyaları ignore edilir
+# ===================================================================
 
-### Gradle ###
+# ===================================================================
+# HASSAS BİLGİLER - ASLA COMMIT ETMEYİN!
+# ===================================================================
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+*.env
+properties.env
+**/properties.env
+secrets/
+**/secrets/
+*.secret
+*.key
+*.pem
+*.p12
+*.jks
+*.keystore
+*.truststore
+
+# Application Properties (hassas bilgiler içerebilir)
+**/application.properties
+**/application-*.properties
+**/application-*-local.properties
+**/application-*-dev.properties
+**/application-*-prod.properties
+!**/application.properties.example
+!**/application-*.properties.example
+
+# API Keys & Tokens
+**/api-keys.txt
+**/tokens.txt
+**/credentials.txt
+**/*credentials*
+**/*api-key*
+**/*token*
+
+# ===================================================================
+# BUILD & COMPILED FILES
+# ===================================================================
+
+# Gradle
 .gradle/
+**/.gradle/
 **/build/
-!src/**/build/
 !gradle/wrapper/gradle-wrapper.jar
+!**/src/**/build/
+gradle-app.setting
+!gradle-wrapper.jar
 
-### Java ###
+# Java
 *.class
 *.jar
 !gradle/wrapper/gradle-wrapper.jar
 *.war
 *.ear
+*.nar
 hs_err_pid*
 replay_pid*
 
-### Environment Variables ###
-.env
-.env.*
-!.env.example
+# Bin directories
+bin/
+**/bin/
+!**/src/**/bin/
 
-### Logs ###
+# ===================================================================
+# LOGS & TEMPORARY FILES
+# ===================================================================
+
+# Logs
 logs/
+**/logs/
 *.log
 *.log.*
+*.out
 ajcore.*.txt
+*.log.*
 
-### Audio Storage ###
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ===================================================================
+# MEDIA & AUDIO FILES
+# ===================================================================
+
+# Audio storage (hassas toplantı kayıtları)
 **/audio_storage/
+**/media-storage/
+**/audio/
+**/media/
+*.mp3
+*.wav
+*.m4a
+*.aac
+*.ogg
+*.flac
+*.wma
+*.mp4
+*.avi
+*.mov
+*.mkv
 
-### IntelliJ IDEA ###
+# ===================================================================
+# DATABASE FILES
+# ===================================================================
+
+# Database dumps & backups
+*.sql
+!docker/mysql/init/*.sql
+*.db
+*.sqlite
+*.sqlite3
+*.h2.db
+*.mv.db
+*.trace.db
+
+# ===================================================================
+# IDE & EDITOR FILES
+# ===================================================================
+
+# IntelliJ IDEA
 .idea/
 *.iws
 *.iml
@@ -40,74 +143,159 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
-### Eclipse / STS ###
-.apt_generated
+# Eclipse
+.apt_generated/
 .classpath
 .factorypath
 .project
 .settings/
 .springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+.sts4-cache/
 
-### NetBeans ###
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
+# VS Code
 .vscode/
+*.code-workspace
 
-### OS Files ###
-.DS_Store
-Thumbs.db
-*.swp
-*~
-desktop.ini
-ehthumbs.db
+# ===================================================================
+# TEST & COVERAGE REPORTS
+# ===================================================================
 
-### Docker ###
-docker-compose.override.yml
-
-### Kafka ###
-kafka-logs/
-zookeeper-data/
-data/
-
-### Spring Boot ###
-HELP.md
-# Tüm properties dosyaları (hassas bilgiler içerebilir)
-**/application.properties
-**/application-*.properties
-# Örnek dosyaları koru
-!**/application.properties.example
-!**/application-*.properties.example
-
-### Temporary Files ###
-*.tmp
-*.temp
-*.bak
-*.backup
-
-### Node (eğer frontend varsa) ###
-node_modules/
-npm-debug.log
-yarn-error.log
-
-### Test Results ###
+# Test results
 **/test-results/
+**/test-results.xml
+**/TEST-*.xml
 **/reports/
-
-### Coverage ###
+**/allure-results/
+**/allure-report/
 coverage/
 *.exec
 jacoco.exec
+*.coverage
+*.lcov
 
-### Compiled binaries ###
+# ===================================================================
+# DOCKER & CONTAINER FILES
+# ===================================================================
+
+# Docker override files (local config)
+docker-compose.override.yml
+docker-compose.local.yml
+.dockerignore.local
+
+# ===================================================================
+# KAFKA & ZOOKEEPER DATA
+# ===================================================================
+
+# Kafka logs & data
+kafka-logs/
+zookeeper-data/
+zookeeper-logs/
+**/kafka-data/
+**/zookeeper-data/
+data/
+**/data/
+
+# ===================================================================
+# NODE.JS (eğer frontend varsa)
+# ===================================================================
+
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+.pnp/
+.pnp.js
+
+# ===================================================================
+# OS SPECIFIC FILES
+# ===================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ===================================================================
+# SPRING BOOT SPECIFIC
+# ===================================================================
+
+HELP.md
+.mvn/
+mvnw
+mvnw.cmd
+.mvn/wrapper/maven-wrapper.jar
+
+# ===================================================================
+# MISC FILES
+# ===================================================================
+
+# Compiled binaries
 **/libs/*.jar
 !gradle/wrapper/gradle-wrapper.jar
 
+# Package files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Backup files
+*.orig
+*.rej
+*~
+
+# ===================================================================
+# PROJECT SPECIFIC
+# ===================================================================
+
+# Allure test results
+**/allure-results/
+**/allure-report/
+
+# Local configuration
+local.properties
+local.env
+*.local
+
+# Batch files (opsiyonel - eğer hassas bilgi içermiyorsa kaldırılabilir)
+# START-JAVAFX-UI.bat
+# start-local-services.bat
+# check-services.bat
+
+# ===================================================================
+# SECURITY NOTES
+# ===================================================================
+# ÖNEMLİ: Aşağıdaki dosyalar ASLA commit edilmemelidir:
+# - properties.env (gerçek API key'ler içerir)
+# - application.properties (JWT secret, database password içerir)
+# - .env dosyaları
+# - Herhangi bir credentials dosyası
+# ===================================================================

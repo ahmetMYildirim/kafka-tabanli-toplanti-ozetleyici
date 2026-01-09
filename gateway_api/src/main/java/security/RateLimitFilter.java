@@ -70,10 +70,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
         } else {
-            log.warn("Rate limit asildi. Anahtar: {}", key);
+            log.warn("Rate limit exceeded. Key: {}", key);
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\":\"Istek limiti asildi. Lutfen daha sonra tekrar deneyin.\"}");
+            response.getWriter().write("{\"error\":\"Request limit exceeded. Please try again later.\"}");
         }
     }
 

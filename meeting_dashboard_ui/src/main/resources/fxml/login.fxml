@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="650" prefWidth="500" styleClass="login-container" stylesheets="@../css/main.css" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="com.toplanti.dashboard.controller.LoginController">
+
+    <top>
+        <HBox alignment="CENTER_RIGHT" spacing="10">
+            <padding>
+                <Insets bottom="10" left="20" right="20" top="15" />
+            </padding>
+            <ComboBox fx:id="languageCombo" prefWidth="100" />
+        </HBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="20">
+            <padding>
+                <Insets bottom="40" left="50" right="50" top="20" />
+            </padding>
+
+            <Label fx:id="titleLabel" styleClass="login-app-title" text="📊 Toplantı Özetleyici" />
+
+            <!-- Login Form -->
+            <VBox fx:id="loginPane" alignment="CENTER" spacing="15" styleClass="login-form">
+                <padding>
+                    <Insets bottom="30" left="40" right="40" top="30" />
+                </padding>
+
+                <Label fx:id="loginTitleLabel" styleClass="login-title" text="Giriş Yap" />
+
+                <TextField fx:id="usernameField" prefWidth="280" promptText="Kullanıcı Adı" styleClass="login-field" />
+                <PasswordField fx:id="passwordField" prefWidth="280" promptText="Şifre" styleClass="login-field" />
+
+                <Label fx:id="errorLabel" managed="false" styleClass="error-label" visible="false" />
+
+                <Button fx:id="loginButton" onAction="#handleLogin" prefWidth="280" styleClass="login-button" text="Giriş" />
+
+                <Hyperlink fx:id="registerLink" onAction="#showRegisterForm" styleClass="login-link" text="Hesabınız yok mu? Kayıt olun" />
+
+                <Separator />
+
+                <VBox alignment="CENTER" spacing="5" styleClass="demo-info">
+                    <Label styleClass="demo-title" text="Demo Hesaplar:" />
+                    <Label styleClass="demo-account" text="admin / admin123 (CEO)" />
+                    <Label styleClass="demo-account" text="manager / manager123 (Yönetici)" />
+                    <Label styleClass="demo-account" text="user / user123 (Çalışan)" />
+                </VBox>
+            </VBox>
+
+            <!-- Register Form -->
+            <VBox fx:id="registerPane" alignment="CENTER" managed="false" spacing="15" styleClass="login-form" visible="false">
+                <padding>
+                    <Insets bottom="30" left="40" right="40" top="30" />
+                </padding>
+
+                <Label fx:id="registerTitleLabel" styleClass="login-title" text="Kayıt Ol" />
+
+                <TextField fx:id="regUsernameField" prefWidth="280" promptText="Kullanıcı Adı" styleClass="login-field" />
+                <TextField fx:id="regFullNameField" prefWidth="280" promptText="Ad Soyad" styleClass="login-field" />
+                <TextField fx:id="regEmailField" prefWidth="280" promptText="E-posta" styleClass="login-field" />
+                <PasswordField fx:id="regPasswordField" prefWidth="280" promptText="Şifre" styleClass="login-field" />
+                <PasswordField fx:id="regConfirmPasswordField" prefWidth="280" promptText="Şifre Tekrar" styleClass="login-field" />
+                <ComboBox fx:id="regDepartmentCombo" prefWidth="280" promptText="Departman" styleClass="login-field" />
+
+                <Label fx:id="regErrorLabel" managed="false" styleClass="error-label" visible="false" />
+
+                <Button fx:id="registerButton" onAction="#handleRegister" prefWidth="280" styleClass="login-button" text="Kayıt Ol" />
+
+                <Hyperlink fx:id="loginLink" onAction="#showLoginForm" styleClass="login-link" text="Zaten hesabınız var mı? Giriş yapın" />
+            </VBox>
+
+        </VBox>
+    </center>
+</BorderPane>

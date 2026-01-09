@@ -15,14 +15,21 @@ import java.time.LocalDateTime;
  * MeetingService - Toplantı yönetim servisi
  * 
  * Discord ve Zoom toplantılarının yaşam döngüsünü yönetir.
- * Her toplantı işlemi için Outbox pattern kullanarak event oluşturur.
+ * Her toplantı işlemi için Outbox pattern kullanarak güvenilir event oluşturur.
  * 
  * Sorumluluklar:
- * - Toplantı başlatma/sonlandırma
- * - Veritabanı persistance
- * - Outbox event yayınlama (OutboxEventPublisher aracılığıyla)
+ * - Toplantı başlatma ve sonlandırma işlemleri
+ * - Veritabanına persistance (kalıcı hale getirme)
+ * - Outbox event yayınlama (OutboxEventPublisher aracılığıyla Kafka'ya)
  * 
- * Pattern: Transactional Service + Outbox Pattern
+ * Mimari Pattern: Transactional Service + Outbox Pattern
+ * Bu pattern sayesinde veritabanı işlemi ve Kafka event'i atomik olarak gerçekleşir.
+ * 
+ * Kullanım Senaryosu:
+ * 1. Discord/Zoom'da toplantı başladığında startMeeting() çağrılır
+ * 2. Meeting entity oluşturulur ve startTime kaydedilir
+ * 3. MeetingStarted event'i outbox tablosuna yazılır
+ * 4. OutboxEventRelayer bu event'i Kafka'ya gönderir
  * 
  * @author Ahmet
  * @version 1.0
@@ -37,9 +44,16 @@ public class MeetingService {
 
     /**
      * Yeni bir toplantı başlatır ve MeetingStarted event'i oluşturur.
-     * Transaction içinde hem meeting hem de outbox event kaydedilir.
+     * 
+     * Bu metod transactional olarak çalışır; toplantı kaydı ve event oluşturma
+     * işlemleri aynı transaction içinde gerçekleşir. Herhangi bir hata durumunda
+     * her iki işlem de geri alınır (rollback).
+     * 
+     * Başlatma zamanı (startTime) otomatik olarak şimdiki zaman olarak set edilir.
+     * Platform bilgisi (DISCORD veya ZOOM) meeting entity içinde olmalıdır.
      *
-     * @param meeting Başlatılacak toplantı entity
+     * @param meeting Başlatılacak toplantı entity'si (platform, channelId, channelName gibi bilgilerle dolu)
+     * @throws org.springframework.dao.DataAccessException Veritabanı hatası durumunda
      */
     @Transactional
     public void startMeeting(Meeting meeting) {
@@ -52,14 +66,22 @@ public class MeetingService {
                 "Meeting"
         );
         
-        log.info("Toplantı başlatıldı: id={}, platform={}", savedMeeting.getId(), savedMeeting.getPlatform());
+        log.info("Meeting started: id={}, platform={}", savedMeeting.getId(), savedMeeting.getPlatform());
     }
 
     /**
-     * Mevcut bir toplantıyı sonlandırır.
-     * Bitiş zamanını set eder ve MeetingEnded event'i oluşturur.
+     * Mevcut bir toplantıyı sonlandırır ve MeetingEnded event'i oluşturur.
+     * 
+     * Toplantı bitiş zamanı (endTime) otomatik olarak şimdiki zaman olarak set edilir.
+     * Daha önce başlatılmış bir toplantı için çağrılmalıdır; aksi halde 
+     * MediaAssetNotFoundException fırlatılır.
+     * 
+     * Bitiş event'i Kafka üzerinden downstream servislere (AI, Gateway) iletilir.
+     * Bu sayede toplantı analizi ve özet oluşturma süreçleri tetiklenir.
      *
-     * @param meetingId Sonlandırılacak toplantının ID'si
+     * @param meetingId Sonlandırılacak toplantının benzersiz ID'si
+     * @throws MediaAssetNotFoundException Belirtilen ID ile toplantı bulunamazsa
+     * @throws org.springframework.dao.DataAccessException Veritabanı hatası durumunda
      */
     @Transactional
     public void endMeeting(Long meetingId) {
@@ -75,6 +97,6 @@ public class MeetingService {
                 "Meeting"
         );
 
-        log.info("Toplantı sonlandırıldı: id={}", meetingId);
+        log.info("Meeting ended: id={}", meetingId);
     }
 }

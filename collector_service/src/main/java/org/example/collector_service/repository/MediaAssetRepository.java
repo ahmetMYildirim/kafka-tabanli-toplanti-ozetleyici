@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface MediaAssetRepository extends JpaRepository<MediaAsset, Long> {
     Optional<MediaAsset> findByFileKey(String fileKey);
+    Optional<MediaAsset> findByChecksum(String checksum);
     boolean existsByChecksum(String checksum);
 }

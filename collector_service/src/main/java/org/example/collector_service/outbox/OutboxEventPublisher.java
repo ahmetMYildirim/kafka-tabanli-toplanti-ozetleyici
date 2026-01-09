@@ -14,18 +14,27 @@ import java.time.LocalDateTime;
  * OutboxEventPublisher - Merkezi Outbox event yayınlama servisi
  * 
  * Transactional Outbox Pattern için event oluşturma mantığını merkezileştirir.
- * Tüm service'ler bu sınıfı kullanarak outbox event'leri yayınlar.
+ * Tüm servisler bu sınıfı kullanarak outbox event'lerini yayınlar.
  * 
  * Avantajlar:
- * - Kod tekrarını önler (DRY principle)
+ * - Kod tekrarını önler (DRY - Don't Repeat Yourself prensibi)
  * - Merkezi hata yönetimi
- * - Tutarlı event format'ı
+ * - Tutarlı event formatı
  * - Test edilebilirlik
  * 
- * Kullanım: Service'ler @Transactional metod içinde aggregate save
- * ile birlikte bu sınıfı çağırır.
+ * Mimari Pattern: Transactional Outbox Pattern
+ * Bu pattern, veritabanı transaction'ı ile event yayınlama işlemini
+ * atomik hale getirir. Böylece data inconsistency önlenir.
  * 
- * Pattern: Publisher (Transactional Outbox Pattern)
+ * İş Akışı:
+ * 1. Service, aggregate'i veritabanına kaydeder
+ * 2. Aynı transaction içinde OutboxEventPublisher çağrılır
+ * 3. Event, outbox tablosuna JSON olarak yazılır
+ * 4. OutboxEventRelayer bu event'leri Kafka'ya gönderir
+ * 5. Başarılı gönderimden sonra processed=true olarak işaretlenir
+ * 
+ * Kullanım: Service'ler @Transactional metod içinde aggregate kayıtla
+ * birlikte bu sınıfı çağırmalıdır.
  * 
  * @author Ahmet
  * @version 1.0
@@ -66,12 +75,12 @@ public class OutboxEventPublisher {
             
             outBoxEventRepository.save(event);
             
-            log.debug("Outbox event yayınlandı: type={}, id={}, event={}", 
+            log.debug("Outbox event published: type={}, id={}, event={}", 
                     aggregateType, aggregateId, eventType);
             
         } catch (JsonProcessingException e) {
             String errorMsg = String.format(
-                    "Outbox event serialization hatası: type=%s, id=%s, event=%s", 
+                    "Outbox event serialization failed: type=%s, id=%s, event=%s", 
                     aggregateType, aggregateId, eventType
             );
             log.error(errorMsg, e);

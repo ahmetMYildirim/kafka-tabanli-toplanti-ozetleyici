@@ -50,7 +50,7 @@ public class JwtTokenProvider {
     public void init() {
         byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
         this.key = Keys.hmacShaKeyFor(keyBytes);
-        log.info("JWT kriptografik anahtar basariyla olusturuldu");
+        log.info("JWT cryptographic key created successfully");
     }
 
     /**
@@ -71,7 +71,7 @@ public class JwtTokenProvider {
                 .signWith(key)
                 .compact();
         
-        log.debug("Yeni JWT token olusturuldu. Kullanici: {}", username);
+        log.debug("New JWT token created. User: {}", username);
         return token;
     }
 
@@ -105,13 +105,13 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             parseToken(token);
-            log.debug("JWT token dogrulama basarili");
+            log.debug("JWT token validation successful");
             return true;
         } catch (ExpiredJwtException e) {
-            log.warn("JWT token suresi dolmus: {}", e.getMessage());
+            log.warn("JWT token expired: {}", e.getMessage());
             return false;
         } catch (JwtException e) {
-            log.error("JWT token dogrulama hatasi: {}", e.getMessage());
+            log.error("JWT token validation error: {}", e.getMessage());
             return false;
         }
     }

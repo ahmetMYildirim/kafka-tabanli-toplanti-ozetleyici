@@ -53,42 +53,42 @@ class RateLimitFilterTest {
         @Test
         @DisplayName("Should allow request within limit")
         void doFilterInternal_WithinLimit_ShouldAllow() throws Exception {
-            // Given
+            
             when(request.getRemoteAddr()).thenReturn("192.168.1.1");
 
-            // When
+            
             rateLimitFilter.doFilterInternal(request, response, filterChain);
 
-            // Then
+            
             verify(filterChain).doFilter(request, response);
         }
 
         @Test
         @DisplayName("Should block request when limit exceeded")
         void doFilterInternal_WhenLimitExceeded_ShouldBlock() throws Exception {
-            // Given
+            
             when(request.getRemoteAddr()).thenReturn("192.168.1.100");
 
             StringWriter stringWriter = new StringWriter();
             PrintWriter printWriter = new PrintWriter(stringWriter);
             when(response.getWriter()).thenReturn(printWriter);
 
-            // Exhaust rate limit
+            
             for (int i = 0; i < 60; i++) {
                 rateLimitFilter.doFilterInternal(request, response, filterChain);
             }
 
-            // When - 61st request should be blocked
+            
             rateLimitFilter.doFilterInternal(request, response, filterChain);
 
-            // Then
+            
             verify(response, atLeastOnce()).setStatus(429);
         }
 
         @Test
         @DisplayName("Should use authenticated user as key")
         void doFilterInternal_WithAuthenticatedUser_ShouldUseUserKey() throws Exception {
-            // Given
+            
             Authentication auth = mock(Authentication.class);
             when(auth.isAuthenticated()).thenReturn(true);
             when(auth.getPrincipal()).thenReturn("testuser");
@@ -97,23 +97,23 @@ class RateLimitFilterTest {
             when(securityContext.getAuthentication()).thenReturn(auth);
             SecurityContextHolder.setContext(securityContext);
 
-            // When
+            
             rateLimitFilter.doFilterInternal(request, response, filterChain);
 
-            // Then
+            
             verify(filterChain).doFilter(request, response);
         }
 
         @Test
         @DisplayName("Should use X-Forwarded-For header for IP")
         void doFilterInternal_WithXForwardedFor_ShouldUseProxyIP() throws Exception {
-            // Given
+            
             when(request.getHeader("X-Forwarded-For")).thenReturn("10.0.0.1, 192.168.1.1");
 
-            // When
+            
             rateLimitFilter.doFilterInternal(request, response, filterChain);
 
-            // Then
+            
             verify(filterChain).doFilter(request, response);
         }
     }
@@ -125,39 +125,39 @@ class RateLimitFilterTest {
         @Test
         @DisplayName("Should not filter WebSocket endpoints")
         void shouldNotFilter_WebSocketPath_ShouldReturnTrue() throws Exception {
-            // Given
+            
             when(request.getServletPath()).thenReturn("/ws/meetings");
 
-            // When
+            
             boolean shouldNotFilter = rateLimitFilter.shouldNotFilter(request);
 
-            // Then
+            
             assertThat(shouldNotFilter).isTrue();
         }
 
         @Test
         @DisplayName("Should not filter health check endpoint")
         void shouldNotFilter_HealthCheck_ShouldReturnTrue() throws Exception {
-            // Given
+            
             when(request.getServletPath()).thenReturn("/actuator/health");
 
-            // When
+            
             boolean shouldNotFilter = rateLimitFilter.shouldNotFilter(request);
 
-            // Then
+            
             assertThat(shouldNotFilter).isTrue();
         }
 
         @Test
         @DisplayName("Should filter regular API endpoints")
         void shouldNotFilter_RegularApi_ShouldReturnFalse() throws Exception {
-            // Given
+            
             when(request.getServletPath()).thenReturn("/api/v1/meetings");
 
-            // When
+            
             boolean shouldNotFilter = rateLimitFilter.shouldNotFilter(request);
 
-            // Then
+            
             assertThat(shouldNotFilter).isFalse();
         }
     }

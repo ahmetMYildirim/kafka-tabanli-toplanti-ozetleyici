@@ -40,7 +40,7 @@ public class VoiceSessionServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Clear active sessions before each test
+        
         Map<String, Long> activeSessions = new ConcurrentHashMap<>();
         ReflectionTestUtils.setField(voiceSessionService, "activeSessions", activeSessions);
     }
@@ -79,7 +79,7 @@ public class VoiceSessionServiceTest {
         @Test
         @DisplayName("Second user joining should increment participant count")
         void handleUserJoined_SecondUser_ShouldIncrementCount() {
-            // Setup: First user joins
+            
             VoiceSession existingSession = VoiceSession.builder()
                     .id(1L)
                     .platform(PLATFORM)
@@ -91,10 +91,10 @@ public class VoiceSessionServiceTest {
             when(voiceSessionRepository.save(any(VoiceSession.class))).thenReturn(existingSession);
             when(voiceSessionRepository.findById(1L)).thenReturn(Optional.of(existingSession));
 
-            // First user joins
+            
             voiceSessionService.handleUserJoinedVoiceChannel(PLATFORM, CHANNEL_ID, CHANNEL_NAME, USER_NAME);
 
-            // Second user joins
+            
             voiceSessionService.handleUserJoinedVoiceChannel(PLATFORM, CHANNEL_ID, CHANNEL_NAME, "SecondUser");
 
             assertThat(existingSession.getParticipantCount()).isEqualTo(2);
@@ -115,10 +115,10 @@ public class VoiceSessionServiceTest {
             when(voiceSessionRepository.save(any(VoiceSession.class))).thenReturn(savedSession);
             when(voiceSessionRepository.findById(1L)).thenReturn(Optional.empty());
 
-            // First user joins - creates session
+            
             voiceSessionService.handleUserJoinedVoiceChannel(PLATFORM, CHANNEL_ID, CHANNEL_NAME, USER_NAME);
 
-            // Second user joins - should throw exception because session not found
+            
             assertThatThrownBy(() ->
                 voiceSessionService.handleUserJoinedVoiceChannel(PLATFORM, CHANNEL_ID, CHANNEL_NAME, "SecondUser"))
                 .isInstanceOf(MediaAssetNotFoundException.class);
@@ -144,10 +144,10 @@ public class VoiceSessionServiceTest {
             when(voiceSessionRepository.save(any(VoiceSession.class))).thenReturn(existingSession);
             when(voiceSessionRepository.findById(1L)).thenReturn(Optional.of(existingSession));
 
-            // First user joins
+            
             voiceSessionService.handleUserJoinedVoiceChannel(PLATFORM, CHANNEL_ID, CHANNEL_NAME, USER_NAME);
 
-            // User leaves
+            
             voiceSessionService.handleUserLeftVoiceChannel(PLATFORM, CHANNEL_ID);
 
             assertThat(existingSession.getParticipantCount()).isEqualTo(0);
@@ -170,12 +170,12 @@ public class VoiceSessionServiceTest {
             when(voiceSessionRepository.save(any(VoiceSession.class))).thenReturn(existingSession);
             when(voiceSessionRepository.findById(1L)).thenReturn(Optional.of(existingSession));
 
-            // Simulate active session
+            
             Map<String, Long> activeSessions = new ConcurrentHashMap<>();
             activeSessions.put(PLATFORM + "_" + CHANNEL_ID, 1L);
             ReflectionTestUtils.setField(voiceSessionService, "activeSessions", activeSessions);
 
-            // User leaves
+            
             voiceSessionService.handleUserLeftVoiceChannel(PLATFORM, CHANNEL_ID);
 
             assertThat(existingSession.getParticipantCount()).isEqualTo(1);
@@ -185,7 +185,7 @@ public class VoiceSessionServiceTest {
         @Test
         @DisplayName("Leaving non-existent session should not throw")
         void handleUserLeft_NoActiveSession_ShouldDoNothing() {
-            // No active sessions
+            
             assertThatCode(() ->
                 voiceSessionService.handleUserLeftVoiceChannel(PLATFORM, CHANNEL_ID))
                 .doesNotThrowAnyException();

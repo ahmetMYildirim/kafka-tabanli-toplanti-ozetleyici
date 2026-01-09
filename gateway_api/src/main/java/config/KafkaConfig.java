@@ -60,7 +60,7 @@ public class KafkaConfig {
         deserializer.addTrustedPackages("*");
         deserializer.setUseTypeMapperForKey(true);
 
-        log.info("Kafka consumer factory olusturuldu. Sunucu: {}", bootstrapServers);
+        log.info("Kafka consumer factory created. Server: {}", bootstrapServers);
 
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
     }
@@ -77,7 +77,7 @@ public class KafkaConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         
-        log.info("Kafka listener factory basariyla yapilandirildi");
+        log.info("Kafka listener factory configured successfully");
         
         return factory;
     }

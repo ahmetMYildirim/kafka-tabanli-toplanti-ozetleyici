@@ -45,7 +45,7 @@ public class SessionManager {
      */
     public void addSession(WebSocketSession session) {
         sessions.add(session);
-        log.info("WebSocket oturumu eklendi: {}", session.getId());
+        log.info("WebSocket session added: {}", session.getId());
     }
 
     /**
@@ -56,7 +56,7 @@ public class SessionManager {
     public void removeSession(WebSocketSession session) {
         sessions.remove(session);
         meetingSubscriptions.values().forEach(set -> set.remove(session));
-        log.info("WebSocket oturumu kaldirildi: {}", session.getId());
+        log.info("WebSocket session removed: {}", session.getId());
     }
 
     /**
@@ -69,7 +69,7 @@ public class SessionManager {
         meetingSubscriptions
                 .computeIfAbsent(meetingId, key -> new CopyOnWriteArraySet<>())
                 .add(session);
-        log.info("Toplantiya abone olundu: {}", meetingId);
+        log.info("Subscribed to meeting: {}", meetingId);
     }
 
     /**
@@ -82,7 +82,7 @@ public class SessionManager {
         Set<WebSocketSession> subscribers = meetingSubscriptions.get(meetingId);
         if (subscribers != null) {
             subscribers.remove(session);
-            log.info("Toplanti aboneligi iptal edildi: {}", meetingId);
+            log.info("Meeting subscription cancelled: {}", meetingId);
         }
     }
 

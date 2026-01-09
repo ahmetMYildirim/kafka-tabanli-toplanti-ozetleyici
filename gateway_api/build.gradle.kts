@@ -36,8 +36,15 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:0.12.3")
     implementation("com.bucket4j:bucket4j-core:8.7.0")
 
+    // MySQL & JPA - Database access
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("com.mysql:mysql-connector-j:8.2.0")
+
     // OpenAPI (Swagger) - Auto-generates API documentation
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+
+    // R2DBC SPI - Spring Boot autoconfigure classpath sorunu için
+    implementation("io.r2dbc:r2dbc-spi:1.0.0.RELEASE")
 
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.3")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.3")

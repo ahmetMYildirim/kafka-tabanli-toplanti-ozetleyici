@@ -1,0 +1,461 @@
+/* ==========================================================================
+   Dark Theme - Koyu Tema
+   ========================================================================== */
+
+.root {
+    -fx-base: #1a1a2e;
+    -fx-background: #1a1a2e;
+    -fx-control-inner-background: #1e1e38;
+    -fx-accent: #3498db;
+    -fx-focus-color: #3498db;
+    -fx-background-color: #1a1a2e;
+}
+
+/* Header */
+.header {
+    -fx-background-color: linear-gradient(to right, #0f0f23, #1a1a2e) !important;
+}
+
+.app-title {
+    -fx-text-fill: #e0e0e0;
+}
+
+.stats-label {
+    -fx-text-fill: rgba(255,255,255,0.85);
+    -fx-background-color: rgba(255,255,255,0.1);
+}
+
+.search-box {
+    -fx-background-color: #252545;
+    -fx-border-color: #3a3a5a;
+    -fx-text-fill: #e0e0e0;
+}
+
+.user-info-panel {
+    -fx-background-color: rgba(255,255,255,0.08);
+}
+
+.user-name {
+    -fx-text-fill: #e0e0e0;
+}
+
+/* Panels */
+.task-panel {
+    -fx-background-color: #1a1a2e;
+    -fx-border-color: #2a2a4a;
+}
+
+.task-scroll {
+    -fx-background-color: #1a1a2e;
+    -fx-background: #1a1a2e;
+}
+
+.task-scroll > .viewport {
+    -fx-background-color: #1a1a2e;
+}
+
+.task-scroll .scroll-pane {
+    -fx-background-color: #1a1a2e;
+}
+
+.panel-title {
+    -fx-text-fill: #e0e0e0;
+}
+
+/* Task Items */
+.task-item {
+    -fx-background-color: #252545;
+    -fx-border-color: #3a3a5a;
+}
+
+.task-item:hover {
+    -fx-background-color: #2a2a4e;
+    -fx-border-color: #3498db;
+}
+
+.task-text {
+    -fx-text-fill: #e0e0e0;
+}
+
+.task-assignee {
+    -fx-text-fill: #a0a0a0;
+}
+
+/* Priority Badges Dark */
+.priority-badge {
+    -fx-text-fill: white;
+}
+
+.priority-high, .priority-critical {
+    -fx-background-color: #7f1d1d;
+    -fx-text-fill: #fca5a5;
+}
+
+.priority-medium {
+    -fx-background-color: #713f12;
+    -fx-text-fill: #fcd34d;
+}
+
+.priority-low {
+    -fx-background-color: #14532d;
+    -fx-text-fill: #86efac;
+}
+
+/* Meeting List Panel - ANA SORUN BURASI */
+.meeting-list-panel {
+    -fx-background-color: #1e1e38;
+    -fx-border-color: #3a3a5a;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.meeting-list-panel .scroll-pane {
+    -fx-background-color: #1e1e38;
+    -fx-background: #1e1e38;
+}
+
+.meeting-list-panel .scroll-pane > .viewport {
+    -fx-background-color: #1e1e38;
+}
+
+.meeting-list-panel .scroll-pane .content {
+    -fx-background-color: #1e1e38;
+}
+
+.meeting-scroll {
+    -fx-background-color: #1e1e38;
+    -fx-background: #1e1e38;
+}
+
+.meeting-scroll > .viewport {
+    -fx-background-color: #1e1e38;
+}
+
+.meeting-cards-flow {
+    -fx-background-color: #1e1e38;
+}
+
+/* General ScrollPane override */
+.scroll-pane {
+    -fx-background-color: #1a1a2e;
+    -fx-background: #1a1a2e;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #1a1a2e;
+}
+
+.scroll-pane .content {
+    -fx-background-color: #1a1a2e;
+}
+
+.refresh-button {
+    -fx-background-color: #2563eb;
+    -fx-text-fill: white;
+}
+
+.refresh-button:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+.export-button {
+    -fx-background-color: #059669;
+    -fx-text-fill: white;
+}
+
+/* Meeting Cards */
+.meeting-card {
+    -fx-background-color: #252545;
+    -fx-border-color: #3a3a5a;
+}
+
+.meeting-card:hover {
+    -fx-border-color: #3498db;
+}
+
+.card-title {
+    -fx-text-fill: #e0e0e0;
+}
+
+.card-date {
+    -fx-text-fill: #8888aa;
+}
+
+.card-summary {
+    -fx-text-fill: #b0b0c0;
+}
+
+.card-participants, .card-keypoints {
+    -fx-text-fill: #9090a0;
+}
+
+/* Platform Badges */
+.platform-badge {
+    -fx-text-fill: white;
+}
+
+.platform-discord {
+    -fx-background-color: #4752c4;
+}
+
+.platform-zoom {
+    -fx-background-color: #2563eb;
+}
+
+/* Detail Panel */
+.detail-panel {
+    -fx-background-color: #1e1e38;
+    -fx-border-color: #3a3a5a;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.detail-panel .scroll-pane {
+    -fx-background-color: #1e1e38;
+}
+
+.detail-panel .scroll-pane > .viewport {
+    -fx-background-color: #1e1e38;
+}
+
+/* Tabs */
+.tab-pane {
+    -fx-background-color: #1e1e38;
+}
+
+.tab-pane > .tab-header-area {
+    -fx-background-color: #252545;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: #252545;
+}
+
+.tab-pane > .tab-content-area {
+    -fx-background-color: #1e1e38;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #252545;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #1e1e38;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #8888aa;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #e0e0e0;
+}
+
+/* TextArea */
+.transcription-text {
+    -fx-background-color: #252545;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #3a3a5a;
+}
+
+.text-area {
+    -fx-background-color: #252545;
+    -fx-text-fill: #e0e0e0;
+}
+
+.text-area .content {
+    -fx-background-color: #252545;
+}
+
+/* Labels */
+.label {
+    -fx-text-fill: #c0c0d0;
+}
+
+.no-data-label {
+    -fx-text-fill: #666688;
+}
+
+/* Separator */
+.separator > .line {
+    -fx-border-color: #3a3a5a;
+}
+
+/* ScrollBar */
+.scroll-bar {
+    -fx-background-color: #1a1a2e;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #4a4a6a;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #5a5a7a;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #252545;
+}
+
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: #252545;
+}
+
+/* ComboBox */
+.combo-box {
+    -fx-background-color: #252545;
+    -fx-border-color: #3a3a5a;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #e0e0e0;
+    -fx-background-color: #252545;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #252545;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: #252545;
+    -fx-text-fill: #e0e0e0;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: #3a3a5a;
+}
+
+/* TextField */
+.text-field {
+    -fx-background-color: #252545;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #3a3a5a;
+    -fx-prompt-text-fill: #666688;
+}
+
+/* Button */
+.button {
+    -fx-background-color: #3a3a5a;
+    -fx-text-fill: #e0e0e0;
+}
+
+.button:hover {
+    -fx-background-color: #4a4a6a;
+}
+
+/* CheckBox */
+.check-box .box {
+    -fx-background-color: #252545;
+    -fx-border-color: #4a4a6a;
+}
+
+.check-box:selected .box {
+    -fx-background-color: #3498db;
+}
+
+/* Login Styles Dark */
+.login-container {
+    -fx-background-color: #1a1a2e;
+}
+
+.login-form {
+    -fx-background-color: #252545;
+    -fx-border-color: #3a3a5a;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+}
+
+.login-app-title {
+    -fx-text-fill: #e0e0e0;
+}
+
+.login-title {
+    -fx-text-fill: #d0d0e0;
+}
+
+.login-field {
+    -fx-background-color: #1e1e38;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #3a3a5a;
+}
+
+.login-field:focused {
+    -fx-border-color: #5dade2;
+    -fx-background-color: #252545;
+}
+
+.login-button {
+    -fx-background-color: #3498db;
+    -fx-text-fill: white;
+}
+
+.login-button:hover {
+    -fx-background-color: #2980b9;
+}
+
+.login-link {
+    -fx-text-fill: #5dade2;
+}
+
+.login-link:hover {
+    -fx-text-fill: #85c1e9;
+}
+
+.demo-info {
+    -fx-background-color: rgba(52, 152, 219, 0.15);
+    -fx-border-color: #3a3a5a;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+.demo-title {
+    -fx-text-fill: #8888aa;
+}
+
+.demo-account {
+    -fx-text-fill: #7777a0;
+}
+
+.copyright-label {
+    -fx-text-fill: #4a4a6a;
+}
+
+.error-label {
+    -fx-text-fill: #f87171;
+    -fx-background-color: rgba(248, 113, 113, 0.1);
+}
+
+/* Settings Panel */
+.settings-panel {
+    -fx-background-color: #1a1a2e;
+}
+
+/* Notification */
+.notification {
+    -fx-background-color: #252545;
+    -fx-border-color: #3a3a5a;
+}
+
+.notification-success {
+    -fx-border-color: #22c55e;
+}
+
+.notification-error {
+    -fx-border-color: #ef4444;
+}
+
+.notification-info {
+    -fx-border-color: #3b82f6;
+}
+
+/* Theme button */
+.theme-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e0e0e0;
+}
+
+.logout-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e0e0e0;
+}

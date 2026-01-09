@@ -17,12 +17,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * VoiceSessionService - Sesli oturum yönetim servisi
  * 
  * Discord ve Zoom ses kanallarındaki aktif oturumları takip eder.
- * Kullanıcı giriş/çıkış işlemlerini yönetir ve session lifecycle'ı kontrol eder.
+ * Kullanıcı giriş/çıkış işlemlerini yönetir ve session yaşam döngüsünü kontrol eder.
  * 
  * Özellikler:
- * - Kanal başına aktif session takibi (in-memory Map)
- * - Katılımcı sayısı yönetimi
- * - Oturum başlatma/sonlandırma event'leri
+ * - Kanal başına aktif session takibi (in-memory ConcurrentHashMap)
+ * - Katılımcı sayısı yönetimi (increment/decrement)
+ * - Oturum başlatma/sonlandırma event'leri (Outbox pattern ile)
+ * 
+ * İş Akışı:
+ * 1. İlk kullanıcı kanala katıldığında yeni VoiceSession oluşturulur
+ * 2. Sonraki kullanıcılar için sadece participantCount artırılır
+ * 3. Kullanıcılar ayrıldıkça participantCount azaltılır
+ * 4. Son kullanıcı ayrıldığında session sonlandırılır ve event yayınlanır
+ * 
+ * Thread-Safety: ConcurrentHashMap kullanarak multi-threaded ortamda güvenli çalışır.
  * 
  * @author Ahmet
  * @version 1.0
@@ -38,13 +46,19 @@ public class VoiceSessionService {
     private final Map<String, Long> activeSessions = new ConcurrentHashMap<>();
 
     /**
-     * Kullanıcı ses kanalına katıldığında çağrılır.
-     * İlk kullanıcı ise yeni session başlatır, değilse katılımcı sayısını artırır.
+     * Kullanıcının ses kanalına katılma işlemini yönetir.
+     * 
+     * İlk kullanıcı ise yeni VoiceSession başlatır ve VoiceSessionStarted event'i oluşturur.
+     * Kanal zaten aktifse sadece katılımcı sayısını 1 artırır.
+     * 
+     * Session key formatı: "{platform}_{channelId}" şeklindedir (örn: "DISCORD_123456789")
+     * Bu key ile aynı kanaldaki birden fazla kullanıcı aynı session'a bağlanır.
      *
      * @param platform    Platform adı (DISCORD veya ZOOM)
-     * @param channelId   Kanal ID'si
-     * @param channelName Kanal adı
-     * @param userName    Katılan kullanıcının adı
+     * @param channelId   Kanal ID'si (Discord: snowflake ID, Zoom: meeting ID)
+     * @param channelName Kanal adı (kullanıcı dostu gösterim için)
+     * @param userName    Katılan kullanıcının görünen adı
+     * @throws org.springframework.dao.DataAccessException Veritabanı hatası durumunda
      */
     @Transactional
     public void handleUserJoinedVoiceChannel(String platform, String channelId, String channelName, String userName) {
@@ -52,20 +66,30 @@ public class VoiceSessionService {
 
         if (!activeSessions.containsKey(sessionKey)) {
             startNewSession(platform, channelId, channelName, sessionKey);
-            log.info("Yeni sesli oturum başlatıldı: platform={}, channel={}, user={}", 
+            log.info("New voice session started: platform={}, channel={}, user={}", 
                     platform, channelName, userName);
         } else {
             incrementParticipantCount(sessionKey);
-            log.debug("Sesli oturuma katılım: channel={}, user={}", channelName, userName);
+            log.debug("User joined voice session: channel={}, user={}", channelName, userName);
         }
     }
 
     /**
-     * Kullanıcı ses kanalından ayrıldığında çağrılır.
-     * Son kullanıcı ise session'ı sonlandırır, değilse katılımcı sayısını azaltır.
+     * Kullanıcının ses kanalından ayrılma işlemini yönetir.
+     * 
+     * Son kullanıcı ise session'ı sonlandırır ve VoiceSessionEnded event'i oluşturur.
+     * Kanalda hala kullanıcı varsa sadece katılımcı sayısını 1 azaltır.
+     * 
+     * Katılımcı sayısı 0 veya daha az olduğunda:
+     * - Session endTime'ı set edilir
+     * - Veritabanı güncellenir
+     * - Memory'den kaldırılır (activeSessions Map'ten)
+     * - VoiceSessionEnded event'i Kafka'ya gönderilir
      *
      * @param platform  Platform adı (DISCORD veya ZOOM)
      * @param channelId Kanal ID'si
+     * @throws MediaAssetNotFoundException Belirtilen session ID veritabanında bulunamazsa
+     * @throws org.springframework.dao.DataAccessException Veritabanı hatası durumunda
      */
     @Transactional
     public void handleUserLeftVoiceChannel(String platform, String channelId) {
@@ -76,7 +100,7 @@ public class VoiceSessionService {
             
             VoiceSession session = voiceSessionRepository.findById(sessionId)
                     .orElseThrow(() -> {
-                        log.warn("Aktif session bulunamadı: key={}", sessionKey);
+                        log.warn("Active session not found: key={}", sessionKey);
                         activeSessions.remove(sessionKey);
                         return new MediaAssetNotFoundException("Voice session not found with id: " + sessionId);
                     });
@@ -85,12 +109,12 @@ public class VoiceSessionService {
 
             if (newCount <= 0) {
                 endSession(session, sessionKey);
-                log.info("Sesli oturum sonlandı: platform={}, channel={}",
+                log.info("Voice session ended: platform={}, channel={}",
                         session.getPlatform(), session.getChannelName());
             } else {
                 session.setParticipantCount(newCount);
                 voiceSessionRepository.save(session);
-                log.debug("Sesli oturumdan ayrılma: channel={}, kalan={}",
+                log.debug("User left voice session: channel={}, remaining={}",
                         session.getChannelName(), newCount);
             }
         }
@@ -98,6 +122,15 @@ public class VoiceSessionService {
 
     /**
      * Yeni bir sesli oturum başlatır ve VoiceSessionStarted event'i yayınlar.
+     * 
+     * VoiceSession entity oluşturulur, veritabanına kaydedilir ve 
+     * activeSessions Map'ine eklenir. Bu sayede sonraki kullanıcı katılımlarında
+     * aynı session'a bağlanabilir.
+     * 
+     * @param platform Platform adı (DISCORD veya ZOOM)
+     * @param channelId Kanal ID'si
+     * @param channelName Kanal adı
+     * @param sessionKey Benzersiz session anahtarı (platform_channelId formatında)
      */
     private void startNewSession(String platform, String channelId, String channelName, String sessionKey) {
         VoiceSession session = VoiceSession.builder()
@@ -119,7 +152,13 @@ public class VoiceSessionService {
     }
 
     /**
-     * Katılımcı sayısını 1 artırır.
+     * Belirtilen session'ın katılımcı sayısını 1 artırır.
+     * 
+     * Mevcut session veritabanından okunur, participantCount alanı artırılır
+     * ve tekrar kaydedilir.
+     * 
+     * @param sessionKey Güncellenecek session'ın benzersiz anahtarı
+     * @throws MediaAssetNotFoundException Session ID veritabanında bulunamazsa
      */
     private void incrementParticipantCount(String sessionKey) {
         Long sessionId = activeSessions.get(sessionKey);
@@ -133,6 +172,13 @@ public class VoiceSessionService {
 
     /**
      * Sesli oturumu sonlandırır ve VoiceSessionEnded event'i yayınlar.
+     * 
+     * Session'ın endTime'ı set edilir, participantCount 0'a çekilir ve
+     * activeSessions Map'inden kaldırılır. Son olarak VoiceSessionEnded 
+     * event'i outbox'a yazılarak Kafka'ya gönderilir.
+     * 
+     * @param session Sonlandırılacak VoiceSession entity'si
+     * @param sessionKey Memory'den kaldırılacak session'ın key'i
      */
     private void endSession(VoiceSession session, String sessionKey) {
         session.setParticipantCount(0);
@@ -149,7 +195,17 @@ public class VoiceSessionService {
     }
 
     /**
-     * Platform ve kanal ID'sinden unique session key oluşturur.
+     * Platform ve kanal ID'sinden benzersiz (unique) session key oluşturur.
+     * 
+     * Format: "{platform}_{channelId}"
+     * Örnek: "DISCORD_123456789" veya "ZOOM_987654321"
+     * 
+     * Bu key, aynı kanaldaki tüm kullanıcıların aynı VoiceSession'a
+     * bağlanmasını sağlar.
+     * 
+     * @param platform Platform adı (DISCORD veya ZOOM)
+     * @param channelId Kanal ID'si
+     * @return Benzersiz session anahtarı
      */
     private String buildSessionKey(String platform, String channelId) {
         return platform + "_" + channelId;

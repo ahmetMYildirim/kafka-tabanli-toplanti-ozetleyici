@@ -79,7 +79,10 @@ public class DiscordBotListener extends ListenerAdapter {
                     .build();
             System.out.println("Discord Bot started...");
         }catch (Exception e) {
-            throw new RuntimeException("Discord not started: " + e.getMessage());
+            
+            System.err.println("WARNING: Discord Bot failed to start: " + e.getMessage());
+            System.err.println("Discord Bot is disabled. File upload via UI will still work.");
+            
         }
     }
 

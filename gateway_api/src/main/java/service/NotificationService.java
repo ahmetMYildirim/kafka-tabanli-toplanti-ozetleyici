@@ -39,7 +39,7 @@ import java.util.HashMap;
 public class NotificationService {
     
     private final SessionManager sessionManager;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     /**
      * Yeni toplantı özeti için bildirim gönderir.
@@ -54,7 +54,7 @@ public class NotificationService {
         broadcastToMeetingSubscribers(meetingId, message);
         broadcastToAll(message);
         
-        log.info("Ozet bildirimi gonderildi. Toplanti: {}", meetingId);
+        log.info("Summary notification sent. Meeting: {}", meetingId);
     }
 
     /**
@@ -69,7 +69,7 @@ public class NotificationService {
         broadcastToMeetingSubscribers(meetingId, message);
         broadcastToAll(message);
         
-        log.info("Transkript bildirimi gonderildi. Toplanti: {}", meetingId);
+        log.info("Transcription notification sent. Meeting: {}", meetingId);
     }
 
     /**
@@ -84,7 +84,7 @@ public class NotificationService {
         broadcastToMeetingSubscribers(meetingId, message);
         broadcastToAll(message);
         
-        log.info("Gorev bildirimi gonderildi. Toplanti: {}", meetingId);
+        log.info("Action items notification sent. Meeting: {}", meetingId);
     }
 
     /**
@@ -94,7 +94,7 @@ public class NotificationService {
         Set<WebSocketSession> subscribers = sessionManager.getMeetingSubscribers(meetingId);
         subscribers.forEach(session -> sendMessage(session, message));
         
-        log.debug("Toplanti abonelerine gonderildi. ID: {}, Abone: {}", meetingId, subscribers.size());
+        log.debug("Sent to meeting subscribers. ID: {}, Subscribers: {}", meetingId, subscribers.size());
     }
 
     /**
@@ -116,7 +116,7 @@ public class NotificationService {
                 session.sendMessage(new TextMessage(message));
             }
         } catch (Exception e) {
-            log.error("WebSocket mesaj gonderim hatasi. Oturum: {}, Hata: {}", 
+            log.error("WebSocket message send error. Session: {}, Error: {}", 
                     session.getId(), e.getMessage());
         }
     }
@@ -137,8 +137,8 @@ public class NotificationService {
             
             return objectMapper.writeValueAsString(notification);
         } catch (Exception e) {
-            log.error("Bildirim JSON donusum hatasi: {}", e.getMessage());
-            return String.format("{\"type\":\"%s\",\"error\":\"Veri donusum hatasi\"}", type);
+            log.error("Notification JSON conversion error: {}", e.getMessage());
+            return String.format("{\"type\":\"%s\",\"error\":\"Data conversion error\"}", type);
         }
     }
 }

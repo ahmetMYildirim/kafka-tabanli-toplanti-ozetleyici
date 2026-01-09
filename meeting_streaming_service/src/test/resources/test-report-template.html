@@ -309,17 +309,6 @@
             white-space: nowrap;
         }
 
-        .footer {
-            text-align: center;
-            padding: 30px 0 0;
-            margin-top: 30px;
-            border-top: 1px solid #eee;
-            font-size: 12px;
-            color: #999;
-        }
-
-        .footer p { margin: 4px 0; }
-
         @media (max-width: 900px) {
             .company-card { padding: 26px 22px; }
             .top-header .actions { right: 18px; }
@@ -355,7 +344,7 @@
 
 <body>
 <div class="top-header">
-    <h1>Detailed Test Report</h1>
+    <h1>Test Raporu</h1>
     <div class="date-range">{{REPORT_DATE}}</div>
 </div>
 
@@ -368,82 +357,82 @@
                     <h2>Meeting Streaming Service</h2>
                     <div class="meta">
                         <span>org.example.meeting_streaming_service</span>
-                        <span>Version: 0.0.1-SNAPSHOT</span>
+                        <span>Sürüm: 1.0.0</span>
                         <span>Spring Boot 3.5.6</span>
                     </div>
                 </div>
             </div>
 
             <div class="total-stats">
-                <div class="label">Success Rate</div>
+                <div class="label">Başarı Oranı</div>
                 <div class="value">{{SUCCESS_RATE}}%</div>
             </div>
         </div>
 
         <div class="quick-stats">
-            <span><span class="number">{{TOTAL_TESTS}}</span> tests</span>
+            <span><span class="number">{{TOTAL_TESTS}}</span> test</span>
             <span>•</span>
-            <span><span class="number">{{PASSED_TESTS}}</span> passed</span>
+            <span><span class="number">{{PASSED_TESTS}}</span> başarılı</span>
             <span>•</span>
-            <span><span class="number">{{FAILED_TESTS}}</span> failed</span>
+            <span><span class="number">{{FAILED_TESTS}}</span> başarısız</span>
             <span>•</span>
-            <span><span class="number">{{COVERAGE}}</span>% coverage</span>
+            <span><span class="number">{{COVERAGE}}</span>% kapsama oranı</span>
         </div>
 
         <div class="summary-cards">
             <div class="stat-card total">
                 <div class="number">{{TOTAL_TESTS}}</div>
-                <div class="label">Total Tests</div>
+                <div class="label">Toplam Test</div>
             </div>
             <div class="stat-card passed">
                 <div class="number">{{PASSED_TESTS}}</div>
-                <div class="label">Passed</div>
+                <div class="label">Başarılı</div>
             </div>
             <div class="stat-card failed">
                 <div class="number">{{FAILED_TESTS}}</div>
-                <div class="label">Failed</div>
+                <div class="label">Başarısız</div>
             </div>
         </div>
 
-        <div class="section-title">Project Information</div>
+        <div class="section-title">Proje Bilgileri</div>
         <div class="info-grid">
             <div class="info-item">
-                <div class="label">Project</div>
+                <div class="label">Proje</div>
                 <div class="value">Meeting Streaming Service</div>
             </div>
             <div class="info-item">
-                <div class="label">Version</div>
-                <div class="value">0.0.1-SNAPSHOT</div>
+                <div class="label">Sürüm</div>
+                <div class="value">1.0.0</div>
             </div>
             <div class="info-item">
-                <div class="label">Framework</div>
+                <div class="label">Çerçeve (Framework)</div>
                 <div class="value">Spring Boot 3.5.6</div>
             </div>
             <div class="info-item">
-                <div class="label">Test Framework</div>
+                <div class="label">Test Altyapısı</div>
                 <div class="value">JUnit 5 + Mockito</div>
             </div>
         </div>
 
-        <div class="section-title">Code Coverage</div>
+        <div class="section-title">Kod Kapsaması</div>
         <div class="coverage-section">
             <div class="coverage-bar">
                 <div class="coverage-fill" style="width: {{COVERAGE}}%;"></div>
             </div>
             <div class="coverage-text">
-                <span>Minimum requirement: 30%</span>
+                <span>Minimum gereksinim: %30</span>
                 <span class="percent">{{COVERAGE}}%</span>
             </div>
         </div>
 
-        <div class="section-title">Test Suites</div>
+        <div class="section-title">Test Grupları</div>
         <div class="table-wrap">
             <table class="data-table">
                 <thead>
                 <tr>
-                    <th>Test Suite</th>
-                    <th>Tests</th>
-                    <th>Status</th>
+                    <th>Test Grubu</th>
+                    <th>Test Sayısı</th>
+                    <th>Durum</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -452,14 +441,14 @@
             </table>
         </div>
 
-        <div class="section-title">Test Details</div>
+        <div class="section-title">Test Detayları</div>
         <div class="table-wrap">
             <table class="data-table">
                 <thead>
                 <tr>
-                    <th>Test Name</th>
-                    <th>Duration</th>
-                    <th>Status</th>
+                    <th>Test Adı</th>
+                    <th>Süre</th>
+                    <th>Durum</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -471,4 +460,3 @@
 </div>
 </body>
 </html>
-

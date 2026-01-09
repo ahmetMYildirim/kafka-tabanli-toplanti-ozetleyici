@@ -43,7 +43,7 @@ public class dataStore {
     public void saveSummary(ProcessedSummary summary) {
         String meetingId = summary.getMeetingId();
         summaries.put(meetingId, summary);
-        log.info("Toplanti ozeti kaydedildi. Toplanti ID: {}", meetingId);
+        log.info("Meeting summary saved. Meeting ID: {}", meetingId);
     }
 
     /**
@@ -101,7 +101,7 @@ public class dataStore {
     public void saveTranscription(ProcessedTranscription transcription) {
         String meetingId = transcription.getMeetingId();
         transcriptions.put(meetingId, transcription);
-        log.info("Transkript kaydedildi. Toplanti ID: {}", meetingId);
+        log.info("Transcription saved. Meeting ID: {}", meetingId);
     }
 
     /**
@@ -123,7 +123,7 @@ public class dataStore {
     public void saveActionItems(ProcessedActionItem actionItem) {
         String meetingId = actionItem.getMeetingId();
         actionItems.put(meetingId, actionItem);
-        log.info("Gorev listesi kaydedildi. Toplanti ID: {}", meetingId);
+        log.info("Action items list saved. Meeting ID: {}", meetingId);
     }
 
     /**
@@ -178,6 +178,6 @@ public class dataStore {
         summaries.remove(meetingId);
         transcriptions.remove(meetingId);
         actionItems.remove(meetingId);
-        log.info("Toplanti verileri temizlendi. Toplanti ID: {}", meetingId);
+        log.info("Meeting data cleared. Meeting ID: {}", meetingId);
     }
 }

@@ -14,13 +14,22 @@ import java.io.IOException;
  * geçici PCM dosyalarına yazar. Stream halinde gelen ses verisini
  * bufferlayarak daha sonra MP3'e dönüştürülmek üzere saklar.
  * 
- * Kullanım:
+ * Kullanım Senaryoları:
  * - Gerçek zamanlı ses akışı yakalama
- * - Kullanıcı bazlı ses ayrıştırma
- * - Geçici dosya yönetimi
+ * - Kullanıcı bazlı ses ayrıştırma (her kullanıcı için ayrı dosya)
+ * - Geçici dosya yönetimi (PCM temp files)
  * 
- * Dosya Formatı: PCM (44100 Hz, 16-bit, stereo)
- * Klasör: audio_storage/temp_{userId}.pcm
+ * Teknik Detaylar:
+ * - Dosya Formatı: PCM (48000 Hz, 16-bit, stereo, big-endian)
+ * - Klasör: audio_storage/temp_{userId}.pcm
+ * - Thread-Safe: writeAudioData ve closeOutputStream synchronized
+ * 
+ * İş Akışı:
+ * 1. Constructor ile geçici PCM dosyası oluşturulur
+ * 2. writeAudioData() ile stream halinde veri yazılır
+ * 3. closeOutputStream() ile stream kapatılır
+ * 4. FFmpeg ile PCM -> MP3 dönüşümü yapılır
+ * 5. Geçici PCM dosyası silinir
  * 
  * @author Ahmet
  * @version 1.0
@@ -37,9 +46,13 @@ public class UserAudioData {
 
     /**
      * Constructor - Kullanıcı için geçici ses dosyası oluşturur.
+     * 
+     * Eski PCM dosyası varsa silinir ve yeni bir FileOutputStream açılır.
+     * Append mode kullanılarak stream halinde veri yazılabilir.
      *
-     * @param userId   Discord veya Zoom kullanıcı ID'si
+     * @param userId   Discord veya Zoom kullanıcı ID'si (snowflake ID)
      * @param userName Kullanıcının görünen adı
+     * @throws RuntimeException FileOutputStream oluşturulamazsa
      */
     public UserAudioData(String userId, String userName) {
         this.userId = userId;
@@ -49,40 +62,49 @@ public class UserAudioData {
         try {
             if (tempPcmData.exists()) {
                 if (!tempPcmData.delete()) {
-                    log.warn("Eski PCM dosyası silinemedi: {}", tempPcmData.getPath());
+                    log.warn("Could not delete old PCM file: {}", tempPcmData.getPath());
                 }
             }
             this.outputStream = new FileOutputStream(tempPcmData, true);
         } catch (Exception e) {
-            throw new RuntimeException("Kullanıcı için output stream oluşturulamadı: " + userName, e);
+            throw new RuntimeException("Could not create output stream for user: " + userName, e);
         }
     }
 
     /**
      * Output stream'i güvenli şekilde kapatır.
-     * İdempotent: Birden fazla çağrı güvenlidir.
+     * 
+     * İdempotent: Birden fazla çağrı güvenlidir, closed flag kontrol edilir.
+     * Thread-Safe: synchronized metod, race condition engellenmiştir.
+     * 
+     * Kapatma öncesi flush() çağrılarak buffer'daki tüm veri dosyaya yazılır.
      *
-     * @throws IOException Dosya kapatma hatası
+     * @throws IOException Dosya kapatma hatası veya flush hatası
      */
     public synchronized void closeOutputStream() throws IOException {
         if (outputStream != null && !closed) {
             closed = true;
             outputStream.flush();
             outputStream.close();
-            log.debug("Output stream kapatıldı: {}", userId);
+            log.debug("Output stream closed: userId={}", userId);
         }
     }
 
     /**
-     * Ses verilerini dosyaya yazar.
-     * Thread-safe: Synchronized metod.
+     * Ses verilerini dosyaya yazar ve flush eder.
+     * 
+     * Thread-Safe: synchronized metod, aynı anda birden fazla thread
+     * çağırsa bile data corruption olmaz.
+     * 
+     * Stream kapalıysa IOException fırlatılır. Bu durum, Discord'dan
+     * gelen audio packet'lerin stream kapatıldıktan sonra geldiğini gösterir.
      *
-     * @param data PCM ses byte array
+     * @param data PCM ses byte array (Discord'dan gelen 20ms'lik ses chunk'ı)
      * @throws IOException Dosya yazma hatası veya stream kapalı hatası
      */
     public synchronized void writeAudioData(byte[] data) throws IOException {
         if (closed) {
-            throw new IOException("Output stream zaten kapatılmış: " + userId);
+            throw new IOException("Output stream already closed: " + userId);
         }
         if (outputStream != null) {
             outputStream.write(data);

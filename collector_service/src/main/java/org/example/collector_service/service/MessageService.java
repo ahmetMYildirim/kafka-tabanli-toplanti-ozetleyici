@@ -15,11 +15,24 @@ import org.springframework.transaction.annotation.Transactional;
  * Her mesaj kaydı için Outbox pattern kullanarak MessageCreated event'i oluşturur.
  * 
  * Sorumluluklar:
- * - Mesaj persistance
- * - Outbox event yayınlama (OutboxEventPublisher aracılığıyla)
- * - Transaction yönetimi
+ * - Mesaj persistance (veritabanına kalıcı kayıt)
+ * - Outbox event yayınlama (OutboxEventPublisher aracılığıyla Kafka'ya)
+ * - Transaction yönetimi (@Transactional ile ACID garantisi)
  * 
- * Pattern: Transactional Service + Outbox Pattern
+ * Mimari Pattern: Transactional Service + Outbox Pattern
+ * 
+ * Kullanım Senaryoları:
+ * - Discord channel'larındaki text mesajlar
+ * - Zoom meeting chat mesajları
+ * - Teams conversation mesajları
+ * 
+ * İş Akışı:
+ * 1. Discord/Zoom bot mesaj alır
+ * 2. Message entity oluşturulur
+ * 3. processAndSaveMessage() çağrılır
+ * 4. Transaction içinde mesaj ve event kaydedilir
+ * 5. OutboxEventRelayer Kafka'ya gönderir
+ * 6. AI servisi mesajı alır ve analiz eder
  * 
  * @author Ahmet
  * @version 1.0
@@ -33,10 +46,16 @@ public class MessageService {
     private final OutboxEventPublisher outboxEventPublisher;
 
     /**
-     * Mesajı veritabanına kaydeder ve MessageCreated event'i oluşturur.
+     * Mesajı işler, veritabanına kaydeder ve MessageCreated event'i oluşturur.
+     * 
      * Transaction içinde hem message hem de outbox event atomik olarak kaydedilir.
+     * Bu sayede tutarlılık garantisi sağlanır (ACID properties).
+     * 
+     * Event, Kafka üzerinden downstream servislere (AI, Gateway) iletilir.
+     * AI servisi mesajdan önemli bilgiler çıkarır (action items, sentiment vb.).
      *
-     * @param message Kaydedilecek mesaj entity
+     * @param message Kaydedilecek mesaj entity'si (platform, channelId, author, content vs.)
+     * @throws org.springframework.dao.DataAccessException Veritabanı hatası durumunda
      */
     @Transactional
     public void processAndSaveMessage(Message message) {
@@ -48,7 +67,7 @@ public class MessageService {
                 "Message"
         );
         
-        log.debug("Mesaj kaydedildi: id={}, author={}, platform={}", 
+        log.debug("Message saved: id={}, author={}, platform={}", 
                 savedMessage.getId(), savedMessage.getAuthor(), savedMessage.getPlatform());
     }
 }

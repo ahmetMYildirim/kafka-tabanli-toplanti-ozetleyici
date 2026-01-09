@@ -38,13 +38,13 @@ public class AudioMessageServiceTest {
         void processAndSaveAudioMessage_ShouldSaveAndPublishEvent() {
             AudioMessage audioMessage = AudioMessage.builder()
                     .author("TestUser")
-                    .audioUrl("https://example.com/audio.mp3")
+                    .audioUrl("https:
                     .build();
 
             AudioMessage savedMessage = AudioMessage.builder()
                     .id(1L)
                     .author("TestUser")
-                    .audioUrl("https://example.com/audio.mp3")
+                    .audioUrl("https:
                     .build();
 
             when(audioMessageRepository.save(any(AudioMessage.class))).thenReturn(savedMessage);
@@ -60,14 +60,14 @@ public class AudioMessageServiceTest {
         void processAndSaveAudioMessage_WithTranscription_ShouldSave() {
             AudioMessage audioMessage = AudioMessage.builder()
                     .author("TestUser")
-                    .audioUrl("https://example.com/audio.mp3")
+                    .audioUrl("https:
                     .transcription("Hello world transcription")
                     .build();
 
             AudioMessage savedMessage = AudioMessage.builder()
                     .id(2L)
                     .author("TestUser")
-                    .audioUrl("https://example.com/audio.mp3")
+                    .audioUrl("https:
                     .transcription("Hello world transcription")
                     .build();
 
@@ -93,13 +93,13 @@ public class AudioMessageServiceTest {
             AudioMessage existingMessage = AudioMessage.builder()
                     .id(messageId)
                     .author("TestUser")
-                    .audioUrl("https://example.com/old.mp3")
+                    .audioUrl("https:
                     .build();
 
             AudioMessage updateRequest = AudioMessage.builder()
                     .id(messageId)
                     .transcription("Updated transcription")
-                    .audioUrl("https://example.com/new.mp3")
+                    .audioUrl("https:
                     .build();
 
             when(audioMessageRepository.findById(messageId)).thenReturn(Optional.of(existingMessage));
@@ -108,7 +108,7 @@ public class AudioMessageServiceTest {
             audioMessageService.updateAudioMessage(updateRequest);
 
             assertThat(existingMessage.getTranscription()).isEqualTo("Updated transcription");
-            assertThat(existingMessage.getAudioUrl()).isEqualTo("https://example.com/new.mp3");
+            assertThat(existingMessage.getAudioUrl()).isEqualTo("https:
             verify(outboxEventPublisher).publishUpdated(eq(existingMessage), eq("1"), eq("AudioMessage"));
         }
 
@@ -137,7 +137,7 @@ public class AudioMessageServiceTest {
             AudioMessage existingMessage = AudioMessage.builder()
                     .id(messageId)
                     .author("TestUser")
-                    .audioUrl("https://example.com/audio.mp3")
+                    .audioUrl("https:
                     .build();
 
             AudioMessage updateRequest = AudioMessage.builder()

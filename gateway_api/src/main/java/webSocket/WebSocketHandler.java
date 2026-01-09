@@ -48,9 +48,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String sessionId = session.getId();
         sessionManager.addSession(session);
         
-        log.info("Yeni WebSocket baglantisi kuruldu. Oturum ID: {}", sessionId);
+        log.info("New WebSocket connection established. Session ID: {}", sessionId);
         
-        String welcomeMessage = createResponse("CONNECTED", "Baglanti basarili. Oturum: " + sessionId);
+        String welcomeMessage = createResponse("CONNECTED", "Connection successful. Session: " + sessionId);
         sendMessage(session, welcomeMessage);
     }
 
@@ -66,7 +66,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String sessionId = session.getId();
         sessionManager.removeSession(session);
         
-        log.info("WebSocket baglantisi kapatildi. Oturum: {}, Neden: {}", 
+        log.info("WebSocket connection closed. Session: {}, Reason: {}", 
                 sessionId, status.getReason());
     }
 
@@ -80,7 +80,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-        log.debug("WebSocket mesaji alindi: {}", payload);
+        log.debug("WebSocket message received: {}", payload);
 
         try {
             JsonNode json = objectMapper.readTree(payload);
@@ -94,8 +94,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
             }
             
         } catch (Exception e) {
-            log.error("Mesaj isleme hatasi: {}", e.getMessage());
-            String errorMessage = createResponse("ERROR", "Mesaj isleme hatasi: " + e.getMessage());
+            log.error("Message processing error: {}", e.getMessage());
+            String errorMessage = createResponse("ERROR", "Message processing error: " + e.getMessage());
             sendMessage(session, errorMessage);
         }
     }
@@ -107,10 +107,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String meetingId = json.get("meetingId").asText();
         sessionManager.subscribeToMeeting(session, meetingId);
         
-        String response = createResponse("SUBSCRIBED", "Toplantiya abone olundu: " + meetingId);
+        String response = createResponse("SUBSCRIBED", "Subscribed to meeting: " + meetingId);
         sendMessage(session, response);
         
-        log.info("Toplanti aboneligi eklendi. Oturum: {}, Toplanti: {}", session.getId(), meetingId);
+        log.info("Meeting subscription added. Session: {}, Meeting: {}", session.getId(), meetingId);
     }
     
     /**
@@ -120,10 +120,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String meetingId = json.get("meetingId").asText();
         sessionManager.unsubscribeFromMeeting(session, meetingId);
         
-        String response = createResponse("UNSUBSCRIBED", "Abonelik iptal edildi: " + meetingId);
+        String response = createResponse("UNSUBSCRIBED", "Subscription cancelled: " + meetingId);
         sendMessage(session, response);
         
-        log.info("Toplanti aboneligi iptal edildi. Oturum: {}, Toplanti: {}", session.getId(), meetingId);
+        log.info("Meeting subscription cancelled. Session: {}, Meeting: {}", session.getId(), meetingId);
     }
     
     /**
@@ -138,10 +138,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
      * Bilinmeyen mesaj tipi için hata yanıtı gönderir.
      */
     private void handleUnknown(WebSocketSession session, String type) {
-        String errorMessage = createResponse("ERROR", "Bilinmeyen mesaj tipi: " + type);
+        String errorMessage = createResponse("ERROR", "Unknown message type: " + type);
         sendMessage(session, errorMessage);
         
-        log.warn("Bilinmeyen mesaj tipi alindi: {}", type);
+        log.warn("Unknown message type received: {}", type);
     }
 
     /**
@@ -153,7 +153,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 session.sendMessage(new TextMessage(message));
             }
         } catch (Exception e) {
-            log.error("Mesaj gonderim hatasi. Oturum: {}, Hata: {}", session.getId(), e.getMessage());
+            log.error("Message send error. Session: {}, Error: {}", session.getId(), e.getMessage());
         }
     }
 

@@ -128,7 +128,7 @@ public class OutBoxEventRelayerTest {
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Could not relay event");
 
-            // Event should not be marked as processed
+            
             assertThat(event.isProcessed()).isFalse();
         }
 
