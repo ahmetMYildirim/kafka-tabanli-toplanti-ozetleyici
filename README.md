@@ -275,6 +275,21 @@ kafka-tabanli-toplanti-ozetleyici/
 - Rate limiting
 - Hassas bilgiler environment değişkenlerinde saklanır
 
+## Test
+- Unit test sayısı: 324
+- Başarılı Unit test sayısı: 321
+- Test başarı oranı: %99.07
+### Coverage Oranları
+- AI Service: ~68% *(JaCoCo coverage; mevcut PDF raporu coverage göstermiyor /yanlış görünüyor)*
+- Collector Service: 61%
+- Gateway API: 71%
+- Meeting Streaming Service: 86%
+### Detaylı Raporlar
+- [AI Service Test Raporu](test_reports/AI%20Service%20-%20Test%20Raporu.pdf)
+- [Collector Service Test Raporu](test_reports/Collector%20Service%20-%20Test%20Raporu.pdf)
+- [Gateway API Test Raporu](test_reports/Gateway%20API%20-%20Test%20Raporu.pdf)
+- [Meeting Streaming Service Test Raporu](test_reports/Meeting%20Streaming%20Service%20-%20Test%20Raporu.pdf)
+
 ## Lisans
 
 Bu proje [LICENSE](LICENSE) dosyasında belirtilen lisans altında lisanslanmıştır.
